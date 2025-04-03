@@ -85,7 +85,7 @@ export class ScenarioManagementService {
     // Execute queries
     const [scenarios, total] = await Promise.all([
       this.scenarioCollection.find(query)
-        .sort(sortQuery)
+//        .sort(sortQuery) // commenting out for Azure CosmosDB for Mongo doesn't work by default
         .skip(skip)
         .limit(limit)
         .toArray(),

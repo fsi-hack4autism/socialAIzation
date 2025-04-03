@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from datetime import datetime
-from agent import AgentController
+from .agent import AgentController
 from pydantic import BaseModel
 
 app = FastAPI()

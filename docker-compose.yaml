@@ -1,0 +1,57 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data_container:/data/db
+
+  scenario-backend:
+    build:
+      context: ./App/backend
+    container_name: scenario-be
+    ports:
+      - "5001:3000"
+    depends_on:
+      - mongodb
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - CORS_ORIGIN=*
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRY=1h
+      - SECRETS_PROVIDER=ignore
+      - KEY_VAULT_NAME=ignore
+      - MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
+      - MONGODB_DATABASE_NAME=metaverse-social
+      - MONGODB_USER_COLLECTION=users
+      - MONGODB_SCENARIO_COLLECTION=scenarios
+      - MONGODB_SESSION_COLLECTION=sessions
+      - MONGODB_INTERACTION_COLLECTION=interactions
+
+  scenario-frontend:
+    build:
+      context: ./App/frontend
+    container_name: scenario-fe
+    ports:
+      - "5000:3000"
+    depends_on:
+      - scenario-backend
+    environment:
+      - VITE_API_URL=http://localhost:5001/api
+
+  conversation-api:
+    build:
+      context: ./ConversationAPI/backend
+    container_name: conversation-api
+    ports:
+      - "5002:80"
+    environment:
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - DEPLOYMENT_NAME=${DEPLOYMENT_NAME}
+      - API_VERSION=${API_VERSION}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+
+volumes:
+  mongodb_data_container:

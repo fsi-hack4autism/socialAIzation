@@ -3,8 +3,8 @@ from langgraph.graph import MessagesState
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.checkpoint.memory import MemorySaver
-from personas import PERSONAS
-from auth import DEPLOYMENT, API_VERSION
+from .personas import PERSONAS
+from .auth import DEPLOYMENT, API_VERSION
 from datetime import datetime
  
 
