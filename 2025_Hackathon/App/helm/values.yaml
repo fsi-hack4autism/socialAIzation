@@ -1,0 +1,91 @@
+# Default configuration values for the chart
+# These values can be overridden when deploying or with a values file
+
+# Global values shared by all components
+global:
+  environment: prod
+  imageRegistry: "" # Will be overridden with ACR server
+
+# Backend service configuration
+backend:
+  name: scenario-management
+  replicaCount: 2
+  image:
+    repository: metaverse-social-backend
+    tag: latest  # Will be overridden in CI/CD
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: api.metaverse-social.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: backend-tls
+        hosts:
+          - api.metaverse-social.example.com
+  # Environment-specific configuration
+  env:
+    ASPNETCORE_ENVIRONMENT: "Production"
+
+# Frontend application configuration
+frontend:
+  name: frontend
+  replicaCount: 2
+  image:
+    repository: metaverse-social-frontend
+    tag: latest  # Will be overridden in CI/CD
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: metaverse-social.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: frontend-tls
+        hosts:
+          - metaverse-social.example.com
+  # Environment variables for frontend
+  env:
+    REACT_APP_ENVIRONMENT: "production"
