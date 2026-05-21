@@ -1,0 +1,13 @@
+# Local artifacts not needed for web deployment
+node_modules
+*.rar
+*.zip
+*.7z
+*.apk
+*.obb
+NeuroBloomVR/
+NeuroBloomNewV2_extracted/
+reverse_engineered_AutismSim-arm64_20260521_145133/
+.vercel/
+fsihackathon-fadc2-firebase-adminsdk-fbsvc-6765b35f1b.json
+.env

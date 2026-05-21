@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroBloom — Every conversation is a step forward</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --bg: #F7F4EE;
+      --surface: #FFFFFE;
+      --sage: #4E8A67;
+      --sage-light: rgba(78,138,103,0.12);
+      --coral: #C4715E;
+      --amber: #C9963A;
+      --lavender: #8B7EC4;
+      --text: #1C1510;
+      --text2: #6B5E52;
+      --text3: #A8998C;
+      --border: #E8E3DA;
+      --shadow: 0 1px 4px rgba(28,21,16,0.05), 0 16px 44px rgba(28,21,16,0.06);
+      --radius: 20px;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-ui: 'Nunito', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-ui);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(130px);
+      opacity: 0.08;
+      z-index: 0;
+      animation: floatOrb 18s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 640px; height: 640px; background: var(--sage); top: -180px; left: -120px; }
+    .orb-2 { width: 540px; height: 540px; background: var(--coral); bottom: -160px; right: -80px; animation-duration: 22s; }
+    .orb-3 { width: 380px; height: 380px; background: var(--lavender); top: 28%; right: 10%; animation-duration: 16s; opacity: 0.06; }
+    @keyframes floatOrb {
+      from { transform: translate3d(0,0,0) scale(1); }
+      to { transform: translate3d(28px, 42px, 0) scale(1.08); }
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.08;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(28,21,16,0.12) 0.6px, transparent 0.8px),
+        radial-gradient(circle at 80% 40%, rgba(28,21,16,0.08) 0.5px, transparent 0.8px),
+        radial-gradient(circle at 40% 80%, rgba(28,21,16,0.1) 0.7px, transparent 1px);
+      background-size: 26px 26px, 32px 32px, 24px 24px;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(247,244,238,0.78);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(232,227,218,0.8);
+    }
+    .nav-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      position: relative;
+      z-index: 2;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+    .logo-mark { font-size: 24px; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text2);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .btn, .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-radius: 999px;
+      padding: 14px 24px;
+      border: 1px solid transparent;
+      font-size: 15px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, color 0.22s ease;
+      cursor: pointer;
+    }
+    .btn {
+      background: var(--sage);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(78,138,103,0.2);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(78,138,103,0.24); }
+    .ghost-btn {
+      background: rgba(255,255,254,0.82);
+      color: var(--text2);
+      border-color: var(--border);
+    }
+    .ghost-btn:hover { transform: translateY(-2px); background: #fff; }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+    section {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    .hero {
+      padding-top: 72px;
+      padding-bottom: 84px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,254,0.7);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      line-height: 0.94;
+      letter-spacing: -0.05em;
+      max-width: 12ch;
+    }
+    .hero-copy p {
+      margin: 24px 0 0;
+      font-size: 20px;
+      line-height: 1.75;
+      max-width: 32rem;
+      color: var(--text2);
+    }
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .hero-preview {
+      position: relative;
+      min-height: 560px;
+      display: grid;
+      place-items: center;
+    }
+    .floating-leaf,
+    .floating-pill {
+      position: absolute;
+      background: rgba(255,255,254,0.74);
+      border: 1px solid rgba(232,227,218,0.95);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      animation: drift 9s ease-in-out infinite;
+    }
+    .floating-leaf {
+      width: 84px;
+      height: 84px;
+      border-radius: 28px;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+    }
+    .floating-pill {
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text2);
+    }
+    .leaf-a { top: 8%; left: 5%; }
+    .leaf-b { right: 8%; top: 18%; animation-delay: 1.2s; }
+    .pill-a { left: 8%; bottom: 18%; animation-delay: 0.7s; }
+    .pill-b { right: 6%; bottom: 24%; animation-delay: 1.6s; }
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-14px) rotate(2deg); }
+    }
+
+    .preview-card {
+      width: min(100%, 520px);
+      background: rgba(255,255,254,0.96);
+      border: 1px solid rgba(232,227,218,0.95);
+      border-radius: 32px;
+      box-shadow: 0 24px 60px rgba(28,21,16,0.1);
+      padding: 28px;
+      transform: rotate(-4deg);
+      position: relative;
+      overflow: hidden;
+    }
+    .preview-card::before {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(78,138,103,0.09);
+      top: -80px;
+      right: -60px;
+    }
+    .preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .preview-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+    .preview-sub {
+      color: var(--text3);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .preview-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .mini-stat {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .mini-stat span {
+      display: block;
+      color: var(--text3);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .mini-stat strong {
+      font-family: var(--font-display);
+      font-size: 34px;
+      font-weight: 400;
+      letter-spacing: -0.04em;
+    }
+    .preview-curve {
+      margin-top: 20px;
+      background: linear-gradient(180deg, rgba(139,126,196,0.12), rgba(139,126,196,0));
+      border-radius: 26px;
+      border: 1px solid var(--border);
+      padding: 18px;
+      position: relative;
+      z-index: 1;
+    }
+    .curve-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text3);
+      margin-bottom: 16px;
+    }
+    .curve-svg { width: 100%; height: 132px; }
+
+    .section-shell {
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+    .section-header {
+      max-width: 760px;
+      margin-bottom: 26px;
+    }
+    .section-kicker {
+      color: var(--sage);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(2.1rem, 4vw, 3.25rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
+    .section-text {
+      color: var(--text2);
+      font-size: 18px;
+      line-height: 1.8;
+      margin-top: 14px;
+    }
+
+    .steps, .features {
+      display: grid;
+      gap: 18px;
+    }
+    .steps { grid-template-columns: repeat(3, 1fr); }
+    .features { grid-template-columns: repeat(2, 1fr); }
+    .step-card, .feature-card, .mission-card, .testimonial-card, .cta-card {
+      background: rgba(255,255,254,0.94);
+      border: 1px solid rgba(232,227,218,0.95);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+    .step-card, .feature-card {
+      padding: 26px;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .step-icon, .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+    .step-card h3, .feature-card h3 {
+      margin: 18px 0 10px;
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      font-weight: 400;
+    }
+    .step-card p, .feature-card p {
+      margin: 0;
+      color: var(--text2);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    .feature-card:nth-child(2) { transform: translateY(18px); }
+    .feature-card:nth-child(3) { transform: translateY(-12px); }
+
+    .mission-wrap {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: stretch;
+      padding-top: 54px;
+      padding-bottom: 54px;
+    }
+    .mission-card {
+      padding: 40px;
+      background: linear-gradient(140deg, rgba(78,138,103,0.12), rgba(255,255,254,0.98));
+    }
+    .mission-card p {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+    }
+    .testimonial-card {
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .testimonial-card blockquote {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.85;
+      color: var(--text2);
+      font-weight: 700;
+    }
+    .testimonial-card cite {
+      font-style: normal;
+      color: var(--text3);
+      font-weight: 800;
+    }
+
+    .cta-section {
+      padding-top: 28px;
+      padding-bottom: 80px;
+    }
+    .cta-card {
+      padding: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      background: linear-gradient(135deg, rgba(255,255,254,0.98), rgba(196,113,94,0.08));
+    }
+    .cta-card h2 {
+      margin: 0 0 10px;
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: -0.04em;
+      line-height: 1.04;
+    }
+    .cta-card p {
+      margin: 0;
+      color: var(--text2);
+      font-size: 17px;
+      line-height: 1.75;
+      max-width: 38rem;
+    }
+
+    footer {
+      padding: 0 28px 48px;
+      color: var(--text3);
+      position: relative;
+      z-index: 1;
+    }
+    .footer-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding-top: 24px;
+      border-top: 1px solid rgba(232,227,218,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .footer-brand strong {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(34px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1024px) {
+      .hero,
+      .mission-wrap,
+      .steps,
+      .features,
+      .cta-card { grid-template-columns: 1fr; }
+      .hero-preview { min-height: auto; }
+      .preview-card { transform: none; }
+      .feature-card:nth-child(2),
+      .feature-card:nth-child(3) { transform: none; }
+    }
+    @media (max-width: 720px) {
+      .nav-inner,
+      section,
+      footer { padding-left: 18px; padding-right: 18px; }
+      .nav-links { display: none; }
+      .hero { padding-top: 48px; }
+      .hero-copy p { font-size: 18px; }
+      .hero-actions { flex-direction: column; align-items: stretch; }
+      .preview-stats { grid-template-columns: 1fr; }
+      .cta-card { align-items: flex-start; }
+      .btn, .ghost-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <a class="logo" href="/">
+        <span class="logo-mark">🌿</span>
+        <span>NeuroBloom</span>
+      </a>
+      <div class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#mission">Mission</a>
+        <a href="/scenario-constructor">Scenario Constructor</a>
+        <a class="btn" href="/auth.html">Get Started Free →</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy reveal visible">
+        <div class="eyebrow">VR Social Skills Training</div>
+        <h1>Every conversation is a step forward.</h1>
+        <p>NeuroBloom tracks your child's VR social skills sessions with warm AI analysis, celebrating every small win on the journey.</p>
+        <div class="hero-actions">
+          <a class="btn" href="/auth.html">Get Started Free →</a>
+          <a class="ghost-btn" href="#how">See a demo</a>
+        </div>
+      </div>
+
+      <div class="hero-preview reveal visible">
+        <div class="floating-leaf leaf-a">🥽</div>
+        <div class="floating-leaf leaf-b">🌿</div>
+        <div class="floating-pill pill-a">Coach Aria says: “You stayed curious today.”</div>
+        <div class="floating-pill pill-b">Achievement unlocked • Great Listener</div>
+
+        <div class="preview-card">
+          <div class="preview-head">
+            <div>
+              <div class="preview-title">Quiet Progress</div>
+              <div class="preview-sub">A calm place for every small win.</div>
+            </div>
+            <div class="eyebrow" style="margin:0;background:rgba(78,138,103,0.1);color:var(--sage);border:none;">Live Dashboard</div>
+          </div>
+          <div class="preview-stats">
+            <div class="mini-stat">
+              <span>Score</span>
+              <strong>87</strong>
+            </div>
+            <div class="mini-stat">
+              <span>Sessions</span>
+              <strong>12</strong>
+            </div>
+            <div class="mini-stat">
+              <span>Streak</span>
+              <strong>4</strong>
+            </div>
+          </div>
+          <div class="preview-curve">
+            <div class="curve-title">Journey over time</div>
+            <svg class="curve-svg" viewBox="0 0 420 132" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M10 104C45 98 56 92 83 88C110 84 128 74 152 68C186 59 206 62 240 54C272 46 290 39 324 33C355 27 376 22 410 18" stroke="#C4715E" stroke-width="5" stroke-linecap="round" />
+              <path d="M10 104C45 98 56 92 83 88C110 84 128 74 152 68C186 59 206 62 240 54C272 46 290 39 324 33C355 27 376 22 410 18V132H10V104Z" fill="url(#paint0_linear)" />
+              <defs>
+                <linearGradient id="paint0_linear" x1="210" y1="18" x2="210" y2="132" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#C4715E" stop-opacity="0.24" />
+                  <stop offset="1" stop-color="#C4715E" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell" id="how">
+      <div class="section-header reveal">
+        <div class="section-kicker">How it works</div>
+        <h2 class="section-title">A gentle rhythm of practice, reflection, and growth.</h2>
+        <p class="section-text">NeuroBloom turns each VR conversation into something a child, parent, and therapist can understand together.</p>
+      </div>
+      <div class="steps">
+        <article class="step-card reveal">
+          <div class="step-icon">🥽</div>
+          <div>
+            <h3>Play in VR</h3>
+            <p>Practice social scenarios in an immersive VR environment designed for real-life confidence building.</p>
+          </div>
+        </article>
+        <article class="step-card reveal">
+          <div class="step-icon">🧠</div>
+          <div>
+            <h3>AI Analyzes</h3>
+            <p>Gemini AI reads the conversation and scores six key social skills with warmth, nuance, and specificity.</p>
+          </div>
+        </article>
+        <article class="step-card reveal">
+          <div class="step-icon">🌿</div>
+          <div>
+            <h3>Watch Growth</h3>
+            <p>A beautiful dashboard reveals patterns, celebrates progress, and makes every small win visible.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-shell" id="features">
+      <div class="section-header reveal">
+        <div class="section-kicker">Features</div>
+        <h2 class="section-title">Designed to notice more than a score.</h2>
+        <p class="section-text">Every detail is tuned for calm, clarity, and encouragement.</p>
+      </div>
+      <div class="features">
+        <article class="feature-card reveal">
+          <div class="feature-icon">📝</div>
+          <div>
+            <h3>Transcript Analysis</h3>
+            <p>Gemini reads every conversation, not just scores, surfacing the specific moments that show growth.</p>
+          </div>
+        </article>
+        <article class="feature-card reveal">
+          <div class="feature-icon">🕸️</div>
+          <div>
+            <h3>Skill Radar</h3>
+            <p>Topic Adherence, Turn Taking, Question Asking, Emotional Acknowledgment, Conversation Initiation, and Response Relevance all mapped in one calm view.</p>
+          </div>
+        </article>
+        <article class="feature-card reveal">
+          <div class="feature-icon">🏅</div>
+          <div>
+            <h3>Achievement System</h3>
+            <p>Badges appear as skills strengthen, helping confidence grow through recognition, not pressure.</p>
+          </div>
+        </article>
+        <article class="feature-card reveal">
+          <div class="feature-icon">💬</div>
+          <div>
+            <h3>Coach Aria</h3>
+            <p>An AI coaching companion offers warm, personalized guidance based on real progress patterns.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="mission-wrap" id="mission">
+      <article class="mission-card reveal">
+        <p>Built for neurodivergent learners who deserve to see their growth celebrated, not just measured.</p>
+      </article>
+      <aside class="testimonial-card reveal">
+        <blockquote>“When progress feels gentle and visible, practice becomes something to return to — not something to fear.”</blockquote>
+        <cite>NeuroBloom mission</cite>
+      </aside>
+    </section>
+
+    <section class="cta-section">
+      <div class="cta-card reveal">
+        <div>
+          <h2>Ready to start the journey?</h2>
+          <p>Create a free account, connect your VR sessions, and watch every conversation bloom into confidence.</p>
+        </div>
+        <a class="btn" href="/auth.html">Create free account →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <strong>NeuroBloom</strong>
+        <span>Warm AI support for VR social skills growth.</span>
+      </div>
+      <div>© 2026 NeuroBloom. Made with calm, care, and curiosity.</div>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18 });
+
+    document.querySelectorAll('.reveal:not(.visible)').forEach((el) => observer.observe(el));
+  </script>
+</body>
+</html>
