@@ -1,0 +1,9 @@
+src/test/
+src/**/*.test.ts
+src/**/*.spec.ts
+jest.config.js
+coverage/
+.vscode/
+*.log
+.git/
+.github/

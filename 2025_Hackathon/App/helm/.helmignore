@@ -1,0 +1,21 @@
+# Patterns to ignore when building packages.
+# This supports shell glob matching, relative path matching, and
+# negation (prefixed with !). Only one pattern per line.
+
+# Common files/directories to ignore
+.DS_Store
+*.swp
+*.bak
+*.tmp
+*~
+.git/
+.gitignore
+.idea/
+.vscode/
+*.tmproj
+.project
+.settings/
+
+# Custom files for this project
+values.dev.yaml
+values.staging.yaml

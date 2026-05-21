@@ -1,0 +1,10 @@
+# Chart.yaml defines the metadata for your Helm chart
+apiVersion: v2
+name: metaverse-social
+description: Helm chart for the Metaverse Social Practice application
+type: application
+version: 0.1.0  # Chart version, increment when you modify the chart
+appVersion: "1.0.0"  # Application version
+maintainers:
+  - name: FIS Autism Hackathon
+    email: 

@@ -1,0 +1,23 @@
+# ConfigMap for backend configuration settings
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  labels:
+    app: {{ .Values.backend.name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    environment: {{ .Values.global.environment }}
+data:
+  appsettings.Production.json: |
+    {
+      "Logging": {
+        "LogLevel": {
+          "Default": "Information",
+          "Microsoft.AspNetCore": "Warning"
+        }
+      },
+      "AllowedHosts": "*",
+      "CORS": {
+        "AllowedOrigins": ["https://{{ (index .Values.frontend.ingress.hosts 0).host }}"]
+      }
+    }

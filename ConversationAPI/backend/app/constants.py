@@ -1,1 +1,0 @@
-POSSIBLE_PERSONAS = ["friendly", "helpful", "preoccupied", "mumbling", "rude", "passive_aggressive"]
