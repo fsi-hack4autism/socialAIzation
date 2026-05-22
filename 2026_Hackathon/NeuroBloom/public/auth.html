@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroBloom — Welcome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --bg: #F7F4EE;
+      --surface: rgba(255,255,254,0.94);
+      --sage: #4E8A67;
+      --sage-light: rgba(78,138,103,0.12);
+      --coral: #C4715E;
+      --amber: #C9963A;
+      --lavender: #8B7EC4;
+      --text: #1C1510;
+      --text2: #6B5E52;
+      --text3: #A8998C;
+      --border: #E8E3DA;
+      --shadow: 0 1px 4px rgba(28,21,16,0.05), 0 18px 50px rgba(28,21,16,0.08);
+      --font-display: 'Fraunces', serif;
+      --font-ui: 'Nunito', sans-serif;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-ui);
+      color: var(--text);
+      background: var(--bg);
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.08;
+      pointer-events: none;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .orb-a { width: 560px; height: 560px; background: var(--sage); top: -140px; left: -120px; }
+    .orb-b { width: 480px; height: 480px; background: var(--coral); right: -120px; bottom: -100px; animation-duration: 24s; }
+    .orb-c { width: 320px; height: 320px; background: var(--lavender); top: 16%; right: 18%; animation-duration: 14s; opacity: 0.06; }
+    @keyframes drift {
+      from { transform: translateY(0) scale(1); }
+      to { transform: translateY(24px) scale(1.08); }
+    }
+
+    .shell {
+      width: min(100%, 1120px);
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .auth-layout {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    .brand-panel,
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid rgba(232,227,218,0.95);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+    .brand-panel {
+      padding: 32px;
+      background: linear-gradient(160deg, rgba(78,138,103,0.12), rgba(255,255,254,0.98));
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 720px;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 26px;
+      letter-spacing: -0.03em;
+    }
+    .logo-mark { font-size: 24px; }
+    .brand-copy h1 {
+      margin: 22px 0 12px;
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 4vw, 3.75rem);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+      max-width: 10ch;
+    }
+    .brand-copy p {
+      margin: 0;
+      font-size: 18px;
+      color: var(--text2);
+      line-height: 1.8;
+      max-width: 28rem;
+    }
+    .info-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .info-item {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 14px;
+      align-items: start;
+      background: rgba(255,255,254,0.78);
+      border: 1px solid rgba(232,227,218,0.95);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .info-item span {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      border-radius: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+    .info-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+    .info-item p {
+      margin: 0;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    .auth-card {
+      padding: 28px;
+      min-height: 720px;
+    }
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .back-link {
+      color: var(--text2);
+      font-weight: 800;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .tabs {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px;
+      gap: 4px;
+    }
+    .tab {
+      border: none;
+      background: transparent;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-family: var(--font-ui);
+      font-weight: 800;
+      color: var(--text3);
+      cursor: pointer;
+    }
+    .tab.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 8px 18px rgba(28,21,16,0.06);
+    }
+
+    .banner {
+      display: none;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(201,150,58,0.3);
+      background: rgba(201,150,58,0.12);
+      color: #8b6224;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+    .banner.show { display: block; }
+
+    .panel-head h2 {
+      margin: 12px 0 8px;
+      font-family: var(--font-display);
+      font-size: 38px;
+      letter-spacing: -0.04em;
+      font-weight: 400;
+    }
+    .panel-head p {
+      margin: 0 0 26px;
+      color: var(--text2);
+      line-height: 1.75;
+      max-width: 34rem;
+    }
+
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+    form {
+      display: grid;
+      gap: 16px;
+    }
+    .grid-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text2);
+      letter-spacing: 0.02em;
+    }
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,254,0.86);
+      font: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    input:focus {
+      border-color: rgba(78,138,103,0.6);
+      box-shadow: 0 0 0 4px rgba(78,138,103,0.12);
+    }
+    .field-error {
+      min-height: 18px;
+      font-size: 12px;
+      color: var(--coral);
+      font-weight: 700;
+    }
+    .helper {
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.55;
+    }
+    .submit-btn {
+      margin-top: 4px;
+      border: none;
+      border-radius: 999px;
+      background: var(--sage);
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      padding: 15px 22px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 54px;
+      box-shadow: 0 14px 28px rgba(78,138,103,0.22);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease;
+    }
+    .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 18px 34px rgba(78,138,103,0.26); }
+    .submit-btn:disabled { cursor: progress; opacity: 0.78; }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    .submit-btn.loading .spinner { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-copy {
+      margin-top: 16px;
+      min-height: 24px;
+      color: var(--text3);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    @media (max-width: 980px) {
+      .auth-layout { grid-template-columns: 1fr; }
+      .brand-panel, .auth-card { min-height: auto; }
+    }
+    @media (max-width: 640px) {
+      .shell { padding: 14px; }
+      .brand-panel, .auth-card { padding: 20px; }
+      .grid-two { grid-template-columns: 1fr; }
+      .top-row { flex-direction: column; align-items: flex-start; }
+      .tabs { width: 100%; }
+      .tab { width: 100%; }
+      .submit-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-a" aria-hidden="true"></div>
+  <div class="orb orb-b" aria-hidden="true"></div>
+  <div class="orb orb-c" aria-hidden="true"></div>
+
+  <div class="shell">
+    <div class="auth-layout">
+      <section class="brand-panel">
+        <div>
+          <a href="/" class="logo">
+            <span class="logo-mark">🌿</span>
+            <span>NeuroBloom</span>
+          </a>
+          <div class="brand-copy">
+            <h1>Quiet progress starts here.</h1>
+            <p>Create a calm home for every VR social skills session — with warm AI reflections, growth tracking, and encouragement that feels human.</p>
+          </div>
+        </div>
+
+        <div class="info-list">
+          <div class="info-item">
+            <span>🧠</span>
+            <div>
+              <strong>Warm AI analysis</strong>
+              <p>Gemini highlights what actually happened in each conversation, not just a number.</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <span>🌿</span>
+            <div>
+              <strong>Growth you can see</strong>
+              <p>Track streaks, achievements, skill patterns, and the moods behind recent sessions.</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <span>💬</span>
+            <div>
+              <strong>Coach Aria support</strong>
+              <p>Ask warm, encouraging questions about progress and get practical next-step advice.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="auth-card">
+        <div class="top-row">
+          <a class="back-link" href="/">← Back to home</a>
+          <div class="tabs" role="tablist" aria-label="Authentication mode">
+            <button class="tab active" id="signInTab" type="button" role="tab" aria-selected="true">Sign In</button>
+            <button class="tab" id="signUpTab" type="button" role="tab" aria-selected="false">Create Account</button>
+          </div>
+        </div>
+
+        <div class="banner" id="configBanner"></div>
+
+        <div class="panel-head">
+          <h2 id="panelTitle">Welcome back</h2>
+          <p id="panelCopy">Sign in to see your dashboard, your journey, and the next calm step forward.</p>
+        </div>
+
+        <div class="form-panel active" id="signInPanel">
+          <form id="signInForm" novalidate>
+            <div class="field">
+              <label for="signInEmail">Email</label>
+              <input id="signInEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
+              <div class="field-error" id="signInEmailError"></div>
+            </div>
+
+            <div class="field">
+              <label for="signInPassword">Password</label>
+              <input id="signInPassword" name="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+              <div class="field-error" id="signInPasswordError"></div>
+            </div>
+
+            <button class="submit-btn" id="signInSubmit" type="submit">
+              <span class="spinner"></span>
+              <span>Welcome back →</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="form-panel" id="signUpPanel">
+          <form id="signUpForm" novalidate>
+            <div class="grid-two">
+              <div class="field">
+                <label for="fullName">Full name</label>
+                <input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Jamie Bloom" />
+                <div class="field-error" id="signUpFullNameError"></div>
+              </div>
+              <div class="field">
+                <label for="playerName">Player name</label>
+                <input id="playerName" name="playerName" type="text" autocapitalize="off" autocomplete="off" placeholder="jamie-bloom" />
+                <div class="helper">This is the VR player identifier. It is saved in lowercase with no spaces.</div>
+                <div class="field-error" id="signUpPlayerNameError"></div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="signUpEmail">Email</label>
+              <input id="signUpEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
+              <div class="field-error" id="signUpEmailError"></div>
+            </div>
+
+            <div class="field">
+              <label for="signUpPassword">Password</label>
+              <input id="signUpPassword" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
+              <div class="field-error" id="signUpPasswordError"></div>
+            </div>
+
+            <button class="submit-btn" id="signUpSubmit" type="submit">
+              <span class="spinner"></span>
+              <span>Start the journey →</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="status-copy" id="statusCopy"></div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+    import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js';
+
+    const $ = (id) => document.getElementById(id);
+    const tabs = {
+      signIn: $('signInTab'),
+      signUp: $('signUpTab'),
+    };
+    const panels = {
+      signIn: $('signInPanel'),
+      signUp: $('signUpPanel'),
+    };
+
+    const state = {
+      mode: 'signIn',
+      firebaseConfigured: false,
+      auth: null,
+      database: null,
+    };
+
+    const config = await fetch('/api/firebase-config').then((response) => response.json()).catch(() => ({ configured: false }));
+    state.firebaseConfigured = !!config.configured;
+
+    if (!state.firebaseConfigured) {
+      const banner = $('configBanner');
+      banner.textContent = 'Firebase is not configured yet. Add your public Firebase keys in .env to enable account creation and sign in.';
+      banner.classList.add('show');
+      $('statusCopy').textContent = 'You can still explore the landing page and dashboard demo mode.';
+      disableForms(true);
+    } else {
+      const firebaseApp = initializeApp({
+        apiKey: config.apiKey,
+        authDomain: config.authDomain,
+        databaseURL: config.databaseURL,
+        projectId: config.projectId,
+        messagingSenderId: config.messagingSenderId,
+        appId: config.appId,
+      });
+      state.auth = getAuth(firebaseApp);
+      state.database = getDatabase(firebaseApp);
+      onAuthStateChanged(state.auth, (user) => {
+        if (user) {
+          window.location.href = '/dashboard.html';
+        }
+      });
+    }
+
+    function disableForms(disabled) {
+      document.querySelectorAll('input, button.submit-btn').forEach((element) => {
+        if (element.classList.contains('tab')) return;
+        element.disabled = disabled;
+      });
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      const signInActive = mode === 'signIn';
+      tabs.signIn.classList.toggle('active', signInActive);
+      tabs.signUp.classList.toggle('active', !signInActive);
+      tabs.signIn.setAttribute('aria-selected', String(signInActive));
+      tabs.signUp.setAttribute('aria-selected', String(!signInActive));
+      panels.signIn.classList.toggle('active', signInActive);
+      panels.signUp.classList.toggle('active', !signInActive);
+      $('panelTitle').textContent = signInActive ? 'Welcome back' : 'Create your NeuroBloom home';
+      $('panelCopy').textContent = signInActive
+        ? 'Sign in to see your dashboard, your journey, and the next calm step forward.'
+        : 'Create an account to save your VR player name and begin tracking warm, visible progress.';
+      $('statusCopy').textContent = '';
+      clearErrors();
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.field-error').forEach((node) => { node.textContent = ''; });
+    }
+
+    function setError(id, message) {
+      const node = $(id);
+      if (node) node.textContent = message;
+    }
+
+    function setStatus(message) {
+      $('statusCopy').textContent = message;
+    }
+
+    function slugify(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-_]/g, '')
+        .replace(/-+/g, '-');
+    }
+
+    function mapAuthError(code, mode) {
+      const messages = {
+        'auth/email-already-in-use': 'That email already has a NeuroBloom account.',
+        'auth/invalid-email': 'Please enter a valid email address.',
+        'auth/weak-password': 'Choose a password with at least 8 characters.',
+        'auth/invalid-credential': 'We could not match that email and password.',
+        'auth/user-not-found': 'We could not find an account with that email.',
+        'auth/wrong-password': 'That password does not look right.',
+        'auth/network-request-failed': 'Your connection dropped. Please try again.',
+        'auth/too-many-requests': 'Too many attempts just now. Please wait a moment and try again.',
+      };
+      return messages[code] || (mode === 'signUp' ? 'We could not create your account just now.' : 'We could not sign you in just now.');
+    }
+
+    function setLoading(button, loading) {
+      button.classList.toggle('loading', loading);
+      button.disabled = loading;
+    }
+
+    tabs.signIn.addEventListener('click', () => setMode('signIn'));
+    tabs.signUp.addEventListener('click', () => setMode('signUp'));
+    $('playerName').addEventListener('input', (event) => {
+      event.target.value = slugify(event.target.value);
+    });
+
+    $('signInForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearErrors();
+      setStatus('');
+      if (!state.firebaseConfigured) return;
+
+      const email = $('signInEmail').value.trim();
+      const password = $('signInPassword').value;
+      let hasError = false;
+
+      if (!email) {
+        setError('signInEmailError', 'Please enter your email.');
+        hasError = true;
+      }
+      if (!password) {
+        setError('signInPasswordError', 'Please enter your password.');
+        hasError = true;
+      }
+      if (hasError) return;
+
+      const button = $('signInSubmit');
+      setLoading(button, true);
+      setStatus('Signing you in…');
+
+      try {
+        await signInWithEmailAndPassword(state.auth, email, password);
+        window.location.href = '/dashboard.html';
+      } catch (error) {
+        const message = mapAuthError(error.code, 'signIn');
+        if (error.code === 'auth/invalid-email') {
+          setError('signInEmailError', message);
+        } else {
+          setError('signInPasswordError', message);
+        }
+        setStatus(message);
+      } finally {
+        setLoading(button, false);
+      }
+    });
+
+    $('signUpForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearErrors();
+      setStatus('');
+      if (!state.firebaseConfigured) return;
+
+      const fullName = $('fullName').value.trim();
+      const playerName = slugify($('playerName').value);
+      const email = $('signUpEmail').value.trim();
+      const password = $('signUpPassword').value;
+      $('playerName').value = playerName;
+
+      let hasError = false;
+
+      if (!fullName) {
+        setError('signUpFullNameError', 'Please enter a full name.');
+        hasError = true;
+      }
+      if (!playerName) {
+        setError('signUpPlayerNameError', 'Choose a player name with letters or numbers.');
+        hasError = true;
+      }
+      if (playerName.includes(' ')) {
+        setError('signUpPlayerNameError', 'Player names cannot contain spaces.');
+        hasError = true;
+      }
+      if (!email) {
+        setError('signUpEmailError', 'Please enter your email.');
+        hasError = true;
+      }
+      if (!password || password.length < 8) {
+        setError('signUpPasswordError', 'Choose a password with at least 8 characters.');
+        hasError = true;
+      }
+      if (hasError) return;
+
+      const button = $('signUpSubmit');
+      setLoading(button, true);
+      setStatus('Creating your account…');
+
+      try {
+        const playerNameRef = ref(state.database, `playerNames/${playerName}`);
+        const playerNameSnap = await get(playerNameRef);
+        if (playerNameSnap.exists()) {
+          setError('signUpPlayerNameError', 'That player name is already in use.');
+          setStatus('Please choose a different player name.');
+          return;
+        }
+
+        const credentials = await createUserWithEmailAndPassword(state.auth, email, password);
+        await updateProfile(credentials.user, { displayName: fullName });
+
+        const now = new Date().toISOString();
+        await Promise.all([
+          set(ref(state.database, `users/${credentials.user.uid}`), {
+            uid: credentials.user.uid,
+            fullName,
+            playerName,
+            email,
+            createdAt: now,
+            updatedAt: now,
+          }),
+          set(playerNameRef, credentials.user.uid),
+        ]);
+
+        window.location.href = '/dashboard.html';
+      } catch (error) {
+        const message = mapAuthError(error.code, 'signUp');
+        if (error.code === 'auth/email-already-in-use' || error.code === 'auth/invalid-email') {
+          setError('signUpEmailError', message);
+        } else if (error.code === 'auth/weak-password') {
+          setError('signUpPasswordError', message);
+        } else {
+          setStatus(message);
+        }
+      } finally {
+        setLoading(button, false);
+      }
+    });
+  </script>
+</body>
+</html>

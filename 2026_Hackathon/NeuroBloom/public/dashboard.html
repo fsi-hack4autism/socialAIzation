@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroBloom — Social Skills Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F7F4EE;
+      --surface: #FFFFFE;
+      --sage: #4E8A67;
+      --sage-light: rgba(78,138,103,0.12);
+      --coral: #C4715E;
+      --coral-light: rgba(196,113,94,0.12);
+      --amber: #C9963A;
+      --amber-light: rgba(201,150,58,0.12);
+      --lavender: #8B7EC4;
+      --lavender-light: rgba(139,126,196,0.12);
+      --text: #1C1510;
+      --text2: #6B5E52;
+      --text3: #A8998C;
+      --border: #E8E3DA;
+      --shadow: 0 1px 4px rgba(28,21,16,0.05), 0 6px 24px rgba(28,21,16,0.04);
+      --shadow-up: 0 2px 8px rgba(28,21,16,0.07), 0 12px 40px rgba(28,21,16,0.06);
+      --radius: 20px;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-ui: 'Nunito', system-ui, sans-serif;
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 250;
+    }
+    #celebrationLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 260;
+      overflow: hidden;
+    }
+    .celebration-badge {
+      position: absolute;
+      left: 50%;
+      top: 22%;
+      transform: translate(-50%, 0);
+      background: rgba(255, 255, 255, 0.97);
+      border: 1px solid rgba(78,138,103,0.25);
+      border-radius: 18px;
+      padding: 14px 18px;
+      box-shadow: var(--shadow-up);
+      min-width: 280px;
+      text-align: center;
+      animation: badgeInOut 2.4s ease forwards;
+    }
+    .celebration-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .celebration-sub {
+      color: var(--text2);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .spark {
+      position: absolute;
+      font-size: 18px;
+      opacity: 0;
+      animation: sparkleFly 1.1s ease forwards;
+    }
+    @keyframes badgeInOut {
+      0% { opacity: 0; transform: translate(-50%, 22px) scale(0.93); }
+      16% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+      84% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -16px) scale(0.96); }
+    }
+    @keyframes sparkleFly {
+      0% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+      20% { opacity: 1; }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.05) rotate(26deg); }
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(140px);
+      will-change: transform;
+    }
+    .orb-sage {
+      width: 900px; height: 900px;
+      background: var(--sage);
+      opacity: 0.055;
+      top: -350px; left: -250px;
+      animation: orbFloat 32s ease-in-out infinite alternate;
+    }
+    .orb-coral {
+      width: 700px; height: 700px;
+      background: var(--coral);
+      opacity: 0.04;
+      bottom: -250px; right: -200px;
+      animation: orbFloat 26s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes orbFloat {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(70px, 90px) scale(1.12); }
+    }
+
+    nav {
+      position: sticky;
+      top: 0; z-index: 50;
+      background: rgba(247,244,238,0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 0 44px;
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-leaf { font-size: 24px; line-height: 1; }
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 21px;
+      font-weight: 400;
+      letter-spacing: -0.025em;
+      background: linear-gradient(130deg, var(--sage) 0%, var(--coral) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-greeting {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text2);
+      letter-spacing: 0.01em;
+      flex: 1;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .date-chip {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text3);
+      letter-spacing: 0.02em;
+    }
+    .live-pill,
+    .user-chip,
+    .nav-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 14px;
+      box-shadow: var(--shadow);
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text3);
+      transition: background 0.5s, box-shadow 0.5s;
+      flex-shrink: 0;
+    }
+    .live-dot.on {
+      background: var(--sage);
+      box-shadow: 0 0 0 3px var(--sage-light);
+      animation: livePulse 2.4s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%,100% { box-shadow: 0 0 0 2px var(--sage-light); }
+      50% { box-shadow: 0 0 0 6px var(--sage-light); }
+    }
+    .live-label, .user-meta small {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text3);
+    }
+    .user-chip {
+      padding: 7px 12px 7px 7px;
+      min-width: 190px;
+    }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--sage-light);
+      color: var(--sage);
+      font-weight: 800;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .user-meta {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .user-meta strong {
+      font-size: 13px;
+      color: var(--text2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-action {
+      border: none;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .nav-action:hover { transform: translateY(-2px); box-shadow: var(--shadow-up); }
+    .nav-action.primary {
+      background: var(--sage);
+      color: #fff;
+      border-color: var(--sage);
+    }
+    .nav-action.ghost {
+      background: rgba(255,255,254,0.85);
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+
+    .banner {
+      max-width: 1380px;
+      margin: 16px auto 0;
+      padding: 14px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(201,150,58,0.3);
+      background: rgba(201,150,58,0.12);
+      color: #8b6224;
+      font-weight: 700;
+      line-height: 1.6;
+      display: none;
+      position: relative;
+      z-index: 2;
+    }
+    .banner.show { display: block; }
+
+    main {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 36px 44px 110px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+    .card:hover { box-shadow: var(--shadow-up); }
+    .card.flash-update { animation: cardPop 0.7s ease-out; }
+    @keyframes cardPop {
+      0% { box-shadow: var(--shadow); }
+      35% { box-shadow: 0 0 0 3px var(--sage-light), var(--shadow-up); }
+      100% { box-shadow: var(--shadow); }
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 28px 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s, transform 0.3s;
+      animation: riseIn 0.55s both;
+    }
+    .stat-card:nth-child(1) { animation-delay: 0.04s; }
+    .stat-card:nth-child(2) { animation-delay: 0.10s; }
+    .stat-card:nth-child(3) { animation-delay: 0.16s; }
+    .stat-card:nth-child(4) { animation-delay: 0.22s; }
+    .stat-card:hover { box-shadow: var(--shadow-up); transform: translateY(-3px); }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      top: 0;
+      left: 0;
+      transform: translate(-40%, -40%);
+      opacity: 0.09;
+      pointer-events: none;
+    }
+    #card-score::before { background: var(--sage); }
+    #card-sessions::before { background: var(--amber); }
+    #card-streak::before { background: var(--coral); }
+    #card-achievements::before { background: var(--lavender); }
+    .stat-label {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 56px;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--text);
+      margin-bottom: 14px;
+      letter-spacing: -0.03em;
+    }
+    .streak-row { display: flex; align-items: baseline; gap: 9px; }
+    .streak-unit {
+      font-family: var(--font-ui);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text2);
+    }
+    .stat-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+      margin-bottom: 11px;
+    }
+    .stat-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--sage), var(--amber));
+      width: 0;
+      transition: width 1.1s cubic-bezier(0.4,0,0.2,1);
+    }
+    .stat-sub {
+      font-size: 12px;
+      color: var(--text3);
+      font-weight: 600;
+    }
+    .level-badge {
+      display: inline-block;
+      margin-top: 9px;
+      background: var(--amber-light);
+      color: var(--amber);
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 11px;
+      border-radius: 100px;
+    }
+    .streak-emoji {
+      font-size: 30px;
+      line-height: 1;
+      margin-bottom: 6px;
+      min-height: 36px;
+      display: block;
+    }
+    .achievement-emoji-row {
+      font-size: 20px;
+      letter-spacing: 5px;
+      margin-bottom: 8px;
+      min-height: 28px;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 370px;
+      gap: 18px;
+      align-items: start;
+      animation: riseIn 0.55s 0.28s both;
+    }
+    .card-inner { padding: 28px; }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
+      gap: 14px;
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 21px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.025em;
+    }
+    .card-subtitle {
+      font-size: 12.5px;
+      color: var(--text3);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .legend {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .legend-item.sage { color: var(--sage); }
+    .legend-item.coral { color: var(--coral); }
+    .legend-item.amber { color: var(--amber); }
+
+    .chart-wrap {
+      position: relative;
+      height: 370px;
+    }
+    .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+    .chart-wrap--wide { height: 250px; }
+    .empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      text-align: center;
+    }
+    .empty-state.hidden { display: none !important; }
+    .empty-icon { font-size: 42px; opacity: 0.35; }
+    .empty-msg {
+      font-size: 14px;
+      color: var(--text3);
+      font-weight: 600;
+      line-height: 1.6;
+    }
+    .api-code {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 12px;
+      color: var(--sage);
+      letter-spacing: 0.02em;
+    }
+
+    .session-card { overflow: hidden; }
+    .session-empty {
+      padding: 0 28px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+    }
+    .session-content { padding: 0 28px 28px; }
+    .hidden { display: none !important; }
+    .scenario-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--sage-light);
+      color: var(--sage);
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .session-meta {
+      font-size: 12.5px;
+      color: var(--text3);
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .stars-display {
+      font-size: 20px;
+      letter-spacing: 4px;
+      margin-bottom: 14px;
+    }
+    .stars-display .star-on { color: var(--amber); }
+    .stars-display .star-off { color: var(--border); }
+    .mood-display {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text2);
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-radius: 12px;
+    }
+    .mood-display .mood-emoji { font-size: 22px; }
+    .feedback-heading {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      margin-bottom: 9px;
+    }
+    .feedback-heading.green { color: var(--sage); }
+    .feedback-heading.amber { color: var(--amber); }
+    .feedback-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 20px;
+    }
+    .feedback-list li {
+      font-size: 13px;
+      color: var(--text2);
+      font-weight: 600;
+      line-height: 1.55;
+      padding: 9px 13px;
+      background: var(--bg);
+      border-radius: 11px;
+    }
+    .feedback-list.highlights li { border-left: 3px solid var(--sage); }
+    .feedback-list.improvements li { border-left: 3px solid var(--amber); }
+    .transcript-section { margin-bottom: 18px; }
+    .transcript-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--text3);
+      font-weight: 500;
+      line-height: 1.65;
+      max-height: 80px;
+      overflow: hidden;
+      position: relative;
+      font-family: 'SF Mono','Fira Code',monospace;
+      white-space: pre-wrap;
+    }
+    .transcript-box::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 28px;
+      background: linear-gradient(transparent, var(--bg));
+    }
+    .summary-pill {
+      background: var(--sage-light);
+      color: var(--sage);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+    .mood-timeline-wrap {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .mood-strip {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 10px;
+    }
+    .mood-strip::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      top: 28px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(139,126,196,0.25), rgba(78,138,103,0.25));
+    }
+    .mood-dot {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      font-size: 16px;
+      z-index: 1;
+    }
+
+    .heatmap-card { animation: riseIn 0.55s 0.34s both; }
+    .heatmap-shell {
+      display: grid;
+      gap: 12px;
+    }
+    .heatmap-weeks {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 6px;
+      padding-left: 2px;
+    }
+    .heatmap-weeks span {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      min-height: 14px;
+    }
+    .heatmap-grid {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-rows: repeat(7, 16px);
+      grid-auto-columns: minmax(16px, 1fr);
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .heatmap-cell {
+      width: 16px;
+      height: 16px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: default;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .heatmap-cell.level-1 { background: rgba(78,138,103,0.18); border-color: rgba(78,138,103,0.22); }
+    .heatmap-cell.level-2 { background: rgba(78,138,103,0.78); border-color: rgba(78,138,103,0.78); }
+    .heatmap-cell:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(28,21,16,0.08); }
+
+    .progress-card { animation: riseIn 0.55s 0.38s both; }
+    .bottom-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      animation: riseIn 0.55s 0.42s both;
+    }
+    .achievements-wrap {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .ach-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 7px 14px 7px 10px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text2);
+      animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.75); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .no-data-msg {
+      font-size: 13.5px;
+      color: var(--text3);
+      font-weight: 600;
+      padding: 28px 0 10px;
+    }
+    .recommend-body {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+    }
+    .recommend-icon-lg { font-size: 52px; line-height: 1; }
+    .recommend-name {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .recommend-desc {
+      font-size: 13px;
+      color: var(--text3);
+      font-weight: 600;
+      line-height: 1.65;
+      max-width: 240px;
+    }
+    .recommend-diff {
+      font-size: 18px;
+      letter-spacing: 5px;
+      color: var(--amber);
+    }
+    .breakdown-rows {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .breakdown-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .breakdown-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text2);
+    }
+    .breakdown-num {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text);
+    }
+    .breakdown-bar {
+      height: 5px;
+      background: var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .breakdown-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--sage), var(--amber));
+      width: 0;
+      transition: width 1.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(90px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 13px 30px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    .analyzing-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(247,244,238,0.82);
+      backdrop-filter: blur(6px);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .analyzing-overlay.active { opacity: 1; pointer-events: all; }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--sage);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .analyzing-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text2);
+    }
+
+    .demo-btn,
+    .coach-fab {
+      position: fixed;
+      bottom: 30px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 14px 22px;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      z-index: 200;
+      letter-spacing: 0.02em;
+      transition: all 0.22s ease;
+    }
+    .demo-btn {
+      right: 180px;
+      background: var(--surface);
+      color: var(--text2);
+    }
+    .demo-btn:hover {
+      background: var(--sage);
+      color: #fff;
+      border-color: var(--sage);
+      box-shadow: 0 6px 24px rgba(78,138,103,0.32);
+      transform: translateY(-3px);
+    }
+    .coach-fab {
+      right: 36px;
+      background: var(--sage);
+      color: #fff;
+      border-color: var(--sage);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 12px 28px rgba(78,138,103,0.28);
+    }
+    .coach-fab:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(78,138,103,0.32); }
+
+    .chat-panel {
+      position: fixed;
+      top: 92px;
+      right: 28px;
+      width: min(420px, calc(100vw - 24px));
+      height: min(72vh, 620px);
+      background: rgba(255,255,254,0.98);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: 0 26px 60px rgba(28,21,16,0.12);
+      z-index: 210;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      transform: translateX(calc(100% + 32px));
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.28s ease, opacity 0.28s ease;
+      overflow: hidden;
+    }
+    .chat-panel.open { transform: translateX(0); opacity: 1; pointer-events: auto; }
+    .chat-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .chat-head-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chat-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: var(--sage-light);
+      font-size: 22px;
+    }
+    .chat-head h3 {
+      font-family: var(--font-display);
+      font-size: 23px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+    }
+    .chat-head p {
+      font-size: 12px;
+      color: var(--text3);
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .chat-close {
+      border: none;
+      background: transparent;
+      color: var(--text3);
+      font-size: 26px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .chat-messages {
+      padding: 18px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(247,244,238,0.55), rgba(255,255,254,0.96));
+    }
+    .chat-bubble {
+      max-width: 85%;
+      padding: 12px 14px;
+      border-radius: 18px;
+      line-height: 1.7;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+      white-space: pre-wrap;
+    }
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: var(--sage);
+      color: #fff;
+      border-bottom-right-radius: 6px;
+    }
+    .chat-bubble.coach {
+      align-self: flex-start;
+      background: #fff;
+      color: var(--text2);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 6px;
+    }
+    .typing {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+    }
+    .typing span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--sage);
+      opacity: 0.5;
+      animation: typing 1.1s ease-in-out infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.12s; }
+    .typing span:nth-child(3) { animation-delay: 0.24s; }
+    @keyframes typing {
+      0%, 100% { transform: translateY(0); opacity: 0.4; }
+      50% { transform: translateY(-4px); opacity: 1; }
+    }
+    .chat-form {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      background: rgba(255,255,254,0.96);
+    }
+    .chat-input {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      resize: none;
+      min-height: 52px;
+      max-height: 120px;
+      outline: none;
+    }
+    .chat-input:focus { border-color: rgba(78,138,103,0.6); box-shadow: 0 0 0 4px var(--sage-light); }
+    .chat-send {
+      border: none;
+      border-radius: 16px;
+      background: var(--sage);
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      padding: 0 18px;
+      cursor: pointer;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(28,21,16,0.28);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 220;
+    }
+    .modal-card {
+      width: min(720px, 100%);
+      max-height: 84vh;
+      overflow: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: 0 26px 60px rgba(28,21,16,0.12);
+      padding: 26px;
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .modal-head h3 {
+      font-family: var(--font-display);
+      font-size: 30px;
+      font-weight: 400;
+      letter-spacing: -0.04em;
+    }
+    .modal-head button {
+      border: none;
+      background: transparent;
+      font-size: 28px;
+      color: var(--text3);
+      cursor: pointer;
+    }
+    .modal-copy {
+      color: var(--text2);
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .report-output {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      min-height: 180px;
+      line-height: 1.8;
+      color: var(--text2);
+      white-space: pre-wrap;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .pill-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text2);
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .pill-btn.primary {
+      background: var(--sage);
+      color: #fff;
+      border-color: var(--sage);
+    }
+    .setup-form {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .setup-form input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      font: inherit;
+      outline: none;
+    }
+    .setup-form input:focus { border-color: rgba(78,138,103,0.6); box-shadow: 0 0 0 4px var(--sage-light); }
+    .field-help { font-size: 12px; color: var(--text3); line-height: 1.55; }
+    .error-copy { min-height: 18px; color: var(--coral); font-size: 12px; font-weight: 700; }
+
+    .innovation-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .mini-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text2);
+      margin-bottom: 8px;
+      letter-spacing: 0.01em;
+    }
+    .muted-copy { color: var(--text3); font-size: 13px; line-height: 1.55; }
+    .coach-drill {
+      background: linear-gradient(145deg, rgba(78,138,103,0.08), rgba(139,126,196,0.08));
+      border: 1px solid rgba(78,138,103,0.18);
+      border-radius: 16px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .drill-title {
+      font-size: 18px;
+      font-family: var(--font-display);
+      color: var(--text);
+    }
+    .drill-list {
+      margin-left: 18px;
+      color: var(--text2);
+      display: grid;
+      gap: 6px;
+      font-size: 14px;
+    }
+    .drill-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tiny-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text2);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .tiny-btn.primary { background: var(--sage); color: #fff; border-color: var(--sage); }
+    .tiny-btn.warn { background: rgba(196,113,94,0.1); border-color: rgba(196,113,94,0.25); color: #a65443; }
+    .explain-grid, .replay-grid, .risk-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .explain-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 11px 12px;
+      background: #fff;
+    }
+    .explain-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .status-pill {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+    .status-pill.good { background: var(--sage-light); color: var(--sage); }
+    .status-pill.mid { background: var(--amber-light); color: #9a731b; }
+    .status-pill.low { background: var(--coral-light); color: #a65443; }
+    .replay-row {
+      border: 1px dashed rgba(168,153,140,0.45);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.65);
+    }
+    .replay-speaker {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+    .replay-note {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--sage);
+      font-weight: 700;
+    }
+    .goal-wrap {
+      display: grid;
+      gap: 10px;
+      background: rgba(139,126,196,0.08);
+      border: 1px solid rgba(139,126,196,0.2);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .goal-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .goal-row input {
+      width: 74px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font: inherit;
+      font-weight: 700;
+    }
+    .persona-wrap {
+      margin-top: 10px;
+      border: 1px solid rgba(78,138,103,0.2);
+      background: rgba(78,138,103,0.06);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .persona-grid input,
+    .persona-grid select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text2);
+    }
+    .goal-meter {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(139,126,196,0.2);
+      overflow: hidden;
+    }
+    .goal-meter-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8B7EC4, #4E8A67);
+      width: 0;
+      transition: width 0.35s ease;
+    }
+    .forecast-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      background: rgba(78,138,103,0.12);
+      color: var(--sage);
+    }
+    .forecast-chip.down {
+      background: rgba(196,113,94,0.12);
+      color: #a65443;
+    }
+    .risk-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fff;
+      font-size: 14px;
+      color: var(--text2);
+    }
+    .risk-item.high {
+      border-color: rgba(196,113,94,0.35);
+      background: rgba(196,113,94,0.08);
+    }
+    .risk-item.medium {
+      border-color: rgba(201,150,58,0.35);
+      background: rgba(201,150,58,0.08);
+    }
+    .section-sub {
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+    .forecast-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .forecast-value {
+      font-size: 34px;
+      font-family: var(--font-display);
+    }
+    .mb-12 { margin-bottom: 12px; }
+    .mini-tight { margin-bottom: 0; }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1180px) {
+      .stats-row, .bottom-row { grid-template-columns: repeat(2, 1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+      .innovation-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 860px) {
+      .nav-inner, main { padding-left: 18px; padding-right: 18px; }
+      .nav-inner { padding-top: 14px; padding-bottom: 14px; align-items: flex-start; }
+      .nav-right { justify-content: flex-start; }
+      .stats-row, .bottom-row { grid-template-columns: 1fr; }
+      .persona-grid { grid-template-columns: 1fr; }
+      .coach-fab { right: 18px; bottom: 20px; }
+      .demo-btn { right: 18px; bottom: 78px; }
+      .chat-panel { right: 12px; top: 84px; width: calc(100vw - 24px); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confettiCanvas"></canvas>
+  <div id="celebrationLayer" aria-hidden="true"></div>
+  <div class="orb orb-sage" aria-hidden="true"></div>
+  <div class="orb orb-coral" aria-hidden="true"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo" aria-label="NeuroBloom home">
+        <span class="logo-leaf" aria-hidden="true">🌿</span>
+        <span class="logo-text">NeuroBloom</span>
+      </a>
+      <span class="nav-greeting" id="navGreeting">Social Skills Journey</span>
+      <div class="nav-right">
+        <span class="date-chip" id="dateChip"></span>
+        <div class="live-pill" aria-live="polite" aria-label="Connection status">
+          <span class="live-dot" id="liveDot"></span>
+          <span class="live-label" id="liveLabel">Connecting</span>
+        </div>
+        <button class="nav-action primary" id="reportButton" type="button">📄 Generate Report</button>
+        <a class="nav-action ghost" href="/scenario-constructor">✨ Scenario Constructor</a>
+        <div class="user-chip" id="userChip">
+          <div class="avatar" id="userAvatar">N</div>
+          <div class="user-meta">
+            <small>NeuroBloom</small>
+            <strong id="userEmail">Loading…</strong>
+          </div>
+        </div>
+        <button class="nav-action ghost hidden" id="signOutButton" type="button">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner" id="firebaseBanner"></div>
+
+  <main>
+    <section class="stats-row" aria-label="Session summary">
+      <div class="stat-card" id="card-score">
+        <div class="stat-label">Overall Score</div>
+        <div class="stat-value" id="valScore">—</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barScore"></div></div>
+        <div class="stat-sub" id="subScore">No sessions yet</div>
+      </div>
+      <div class="stat-card" id="card-sessions">
+        <div class="stat-label">Sessions</div>
+        <div class="stat-value" id="valSessions">—</div>
+        <div class="stat-sub" id="subSessions">Get started!</div>
+        <span class="level-badge" id="levelBadge">Level 1</span>
+      </div>
+      <div class="stat-card" id="card-streak">
+        <div class="stat-label">Streak</div>
+        <span class="streak-emoji" id="streakEmoji"></span>
+        <div class="stat-value"><div class="streak-row"><span id="valStreak">—</span><span class="streak-unit" id="streakUnit"></span></div></div>
+        <div class="stat-sub" id="subStreak">Start your streak!</div>
+      </div>
+      <div class="stat-card" id="card-achievements">
+        <div class="stat-label">Achievements</div>
+        <div class="stat-value" id="valAchievements">—</div>
+        <div class="achievement-emoji-row" id="achievEmojiRow"></div>
+        <div class="stat-sub" id="subAchievements">Play to unlock</div>
+      </div>
+    </section>
+
+    <section class="charts-row">
+      <div class="card">
+        <div class="card-inner">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Skills Profile</div>
+              <div class="card-subtitle">Your social skill dimensions</div>
+            </div>
+            <div class="legend">
+              <div class="legend-item sage"><div class="legend-dot" style="background:var(--sage)"></div>Latest</div>
+              <div class="legend-item coral"><div class="legend-dot" style="background:var(--coral);opacity:0.6"></div>Average</div>
+            </div>
+          </div>
+          <div class="chart-wrap" id="radarWrap">
+            <canvas id="radarChart" aria-label="Social skills radar chart"></canvas>
+            <div class="empty-state" id="radarEmpty">
+              <div class="empty-icon">🕸️</div>
+              <div class="empty-msg">Your skills radar will<br/>appear after your first session.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card session-card" style="position:relative">
+        <div class="analyzing-overlay" id="analyzingOverlay">
+          <div class="spinner"></div>
+          <div class="analyzing-label">Gemini is analysing your session…</div>
+        </div>
+        <div class="card-inner" style="padding-bottom:0">
+          <div class="card-header"><div class="card-title">Latest Session</div></div>
+        </div>
+        <div class="session-empty" id="sessionEmpty">
+          <div class="empty-icon">🎮</div>
+          <div class="empty-msg">No sessions yet.<br/>Submit your first result to<br/>see details here.</div>
+          <code class="api-code">POST /api/input-results</code>
+        </div>
+        <div class="session-content hidden" id="sessionContent">
+          <div class="scenario-chip" id="scenarioChip"></div>
+          <div class="session-meta" id="sessionMeta"></div>
+          <div class="stars-display" id="starsDisplay"></div>
+          <div class="mood-display hidden" id="moodDisplay"></div>
+          <div class="summary-pill hidden" id="summaryPill"></div>
+          <div id="highlightsSec" class="hidden">
+            <div class="feedback-heading green">✦ Highlights</div>
+            <ul class="feedback-list highlights" id="highlightsList"></ul>
+          </div>
+          <div id="improvementsSec" class="hidden">
+            <div class="feedback-heading amber">◆ Focus Areas</div>
+            <ul class="feedback-list improvements" id="improvementsList"></ul>
+          </div>
+          <div class="transcript-section hidden" id="transcriptSec">
+            <div class="feedback-heading" style="color:var(--text3);margin-bottom:8px">📝 Transcript</div>
+            <div class="transcript-box" id="transcriptBox"></div>
+          </div>
+          <div class="mood-timeline-wrap hidden" id="moodTimelineWrap">
+            <div class="feedback-heading" style="color:var(--lavender);margin-bottom:4px">Mood Timeline</div>
+            <div class="mood-strip" id="moodTimeline"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card heatmap-card">
+      <div class="card-inner">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Your Journey</div>
+            <div class="card-subtitle">Last 84 days of practice, one calm square at a time</div>
+          </div>
+          <div class="legend">
+            <div class="legend-item sage"><div class="legend-dot" style="background:rgba(78,138,103,0.18);border:1px solid rgba(78,138,103,0.2)"></div>1 session</div>
+            <div class="legend-item sage"><div class="legend-dot" style="background:rgba(78,138,103,0.78)"></div>2+ sessions</div>
+          </div>
+        </div>
+        <div class="heatmap-shell">
+          <div class="heatmap-weeks" id="heatmapWeeks"></div>
+          <div class="heatmap-grid" id="heatmapGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="card progress-card">
+      <div class="card-inner">
+        <div class="card-header"><div><div class="card-title">Journey Over Time</div><div class="card-subtitle">Overall score across all sessions</div></div></div>
+        <div class="chart-wrap chart-wrap--wide" id="progressWrap">
+          <canvas id="progressChart" aria-label="Score progress line chart"></canvas>
+          <div class="empty-state" id="progressEmpty"><div class="empty-icon">📈</div><div class="empty-msg">Your progress chart will appear here.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="innovation-row">
+      <div class="card"><div class="card-inner"><div class="card-title">Coach Copilot Drill</div><div class="muted-copy section-sub">A focused next-step exercise generated from your weakest skill.</div><div class="coach-drill"><div class="drill-title" id="drillTitle">No drill yet</div><ol class="drill-list" id="drillSteps"><li>Complete a session to generate a drill.</li></ol><div class="drill-actions"><button class="tiny-btn primary" id="askAriaDrill" type="button">Ask Aria To Coach This</button><button class="tiny-btn" id="markDrillDone" type="button">Mark Drill Complete</button></div><div class="muted-copy" id="drillMeta">Aria-ready micro-practice will appear here.</div></div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-title">Risk And Support Signals</div><div class="muted-copy section-sub">Early warnings and gentle supports based on trend shifts.</div><div class="risk-grid" id="riskList"><div class="risk-item">No alerts yet.</div></div></div></div>
+    </section>
+
+    <section class="innovation-row">
+      <div class="card"><div class="card-inner"><div class="card-title">Explainable Score Breakdown</div><div class="muted-copy section-sub">Why each social skill score moved up or down.</div><div class="explain-grid" id="explainRows"><div class="explain-item">Play a session to see explanations.</div></div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-title">Session Replay With Annotations</div><div class="muted-copy section-sub">Transcript timeline with coaching notes on each moment.</div><div class="replay-grid" id="replayRows"><div class="replay-row">No replay yet.</div></div></div></div>
+    </section>
+
+    <section class="innovation-row">
+      <div class="card"><div class="card-inner"><div class="card-title">Forecast And Goals</div><div class="muted-copy section-sub">Projected progress plus weekly goal momentum.</div><div class="mini-title">2-Week Forecast</div><div class="forecast-row"><div class="forecast-value" id="forecastValue">—</div><div class="forecast-chip" id="forecastTrend">Waiting for data</div></div><div class="muted-copy mb-12" id="forecastRange">Need at least 4 sessions to forecast.</div><div class="goal-wrap"><div class="mini-title mini-tight">Weekly Goal + Streak Multiplier</div><div class="goal-row"><label for="goalTarget" class="muted-copy">Sessions this week</label><input id="goalTarget" type="number" min="1" max="14" value="3" /><button class="tiny-btn" id="saveGoalBtn" type="button">Save Goal</button></div><div class="goal-meter"><div class="goal-meter-fill" id="goalMeterFill"></div></div><div class="muted-copy" id="goalStatus">0/3 sessions this week</div><div class="muted-copy" id="streakMultiplier">Streak multiplier: 1.0x</div></div><div class="persona-wrap"><div class="mini-title mini-tight">Warm Personalization Settings</div><div class="persona-grid"><input id="personaPreferredName" type="text" placeholder="Preferred name" /><select id="personaSupportStyle" aria-label="Support style"><option value="gentle">Gentle & calm</option><option value="playful">Playful & upbeat</option><option value="structured">Structured coaching</option></select><input id="personaInterests" type="text" placeholder="Interests (music, animals, games)" /><input id="personaAffirmation" type="text" placeholder="Affirmation style (confidence, curiosity)" /></div><div class="goal-row"><button class="tiny-btn" id="savePersonaBtn" type="button">Save Personalization</button><span class="muted-copy" id="personaHint">Aria will adapt tone and examples using this profile.</span></div></div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-title">Parent/Therapist Snapshot</div><div class="muted-copy section-sub">Export-ready summary with trend, supports, and next steps.</div><div class="muted-copy" id="parentSnapshot">Generate a report to see export insights.</div></div></div>
+    </section>
+
+    <section class="bottom-row">
+      <div class="card"><div class="card-inner"><div class="card-title">Achievements</div><div class="achievements-wrap" id="achievementsList"><div class="no-data-msg">No achievements yet 🌱</div></div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-title">Next Challenge</div><div class="recommend-body"><div class="recommend-icon-lg" id="recIcon">🎯</div><div class="recommend-name" id="recName">Waiting for data…</div><div class="recommend-desc" id="recDesc">Complete your first session to get a personalised recommendation.</div><div class="recommend-diff" id="recDiff"></div></div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-title">Skill Averages</div><div class="breakdown-rows" id="breakdownRows"></div></div></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <button class="demo-btn hidden" id="demoBtn" type="button">✨ Demo Session</button>
+  <button class="coach-fab" id="coachFab" type="button">🌿 Coach Aria</button>
+
+  <aside class="chat-panel" id="chatPanel" aria-label="Coach Aria chat">
+    <div class="chat-head">
+      <div class="chat-head-left"><div class="chat-avatar">🪴</div><div><h3>Coach Aria</h3><p>Warm guidance for your next step.</p></div></div>
+      <button class="chat-close" id="chatClose" type="button" aria-label="Close chat">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <form class="chat-form" id="chatForm">
+      <textarea class="chat-input" id="chatInput" placeholder="Ask about progress, strengths, or what to practice next…"></textarea>
+      <button class="chat-send" type="submit">Send</button>
+    </form>
+  </aside>
+
+  <div class="modal-backdrop hidden" id="reportModal">
+    <div class="modal-card">
+      <div class="modal-head"><h3>Parent Report</h3><button type="button" id="closeReportModal" aria-label="Close report">×</button></div>
+      <div class="modal-copy">A warm plain-English summary designed for parents and therapists.</div>
+      <div class="report-output" id="reportOutput">Your report will appear here.</div>
+      <div class="modal-actions"><button class="pill-btn" id="copyReportButton" type="button">Copy to clipboard</button><button class="pill-btn" id="downloadReportButton" type="button">Download .txt</button><button class="pill-btn primary" id="refreshReportButton" type="button">Generate again</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="playerModal">
+    <div class="modal-card" style="max-width:560px;">
+      <div class="modal-head"><h3>Choose your player name</h3></div>
+      <div class="modal-copy">We could not find your VR player identifier yet. Add it here to connect your dashboard with live session updates.</div>
+      <form class="setup-form" id="playerSetupForm">
+        <input id="playerNameSetup" type="text" placeholder="jamie-bloom" autocapitalize="off" autocomplete="off" />
+        <div class="field-help">Lowercase, no spaces. This should match the player name sent from the VR experience.</div>
+        <div class="error-copy" id="playerModalError"></div>
+        <button class="pill-btn primary" id="savePlayerNameButton" type="submit">Save player name</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+    import { getDatabase, ref, onValue, get, set } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js';
+
+    const SCENARIOS = { classroom: { icon: '🏫', name: 'Classroom', desc: 'Practice discussions and group participation.' }, grocery: { icon: '🛒', name: 'Grocery Store', desc: 'Ask for help finding items and interact at checkout.' }, grocery_store: { icon: '🛒', name: 'Grocery Store', desc: 'Ask for help finding items and interact at checkout.' }, job_interview: { icon: '💼', name: 'Job Interview', desc: 'Answer questions and demonstrate your strengths.' }, playground: { icon: '🎠', name: 'Playground', desc: 'Join group activities and make new friends.' }, restaurant: { icon: '🍽️', name: 'Restaurant', desc: 'Order food and handle unexpected social moments.' }, bus_stop: { icon: '🚌', name: 'Bus Stop', desc: 'Practice patience and casual small talk.' }, general: { icon: '🌍', name: 'Social Skills', desc: 'Varied everyday social interactions.' } };
+    const ACH_META = { first_session: { e: '🌱', l: 'First Step' }, topic_champion: { e: '🎯', l: 'Topic Champion' }, great_listener: { e: '👂', l: 'Great Listener' }, question_master: { e: '❓', l: 'Question Master' }, empathy_star: { e: '💛', l: 'Empathy Star' }, conversation_starter: { e: '🗣️', l: 'Conversation Starter' }, response_ace: { e: '✅', l: 'Response Ace' }, perfect_score: { e: '⭐', l: 'Perfect Score' }, streak_3: { e: '🔥', l: '3-Day Streak' }, streak_7: { e: '⚡', l: 'Week Warrior' } };
+    const MOOD_META = { happy: { e: '😊', l: 'Feeling Happy' }, calm: { e: '😌', l: 'Feeling Calm' }, tired: { e: '😴', l: 'Feeling Tired' }, proud: { e: '🥹', l: 'Feeling Proud' }, excited: { e: '🤩', l: 'Feeling Excited' } };
+    const SKILL_FIELDS = [['topicAdherence', 'Topic Adherence'], ['turnTaking', 'Turn Taking'], ['questionAsking', 'Question Asking'], ['emotionalAcknowledgment', 'Emotional Acknowledgment'], ['conversationInitiation', 'Conversation Initiation'], ['responseRelevance', 'Response Relevance']];
+    const $ = (id) => document.getElementById(id);
+    const emptyAverageScores = () => ({ topicAdherence: 0, turnTaking: 0, questionAsking: 0, emotionalAcknowledgment: 0, conversationInitiation: 0, responseRelevance: 0 });
+
+    let appState = null;
+    let radarChart = null;
+    let lineChart = null;
+    let firebaseConfigured = false;
+    let auth = null;
+    let database = null;
+    let currentUser = null;
+    let currentPlayerName = null;
+    let unsubscribePlayer = null;
+    let pollInterval = null;
+    let chatOpen = false;
+    let coachLoading = false;
+    let hydrated = false;
+    let reportLoading = false;
+    let latestReportText = '';
+    let confettiFrame = null;
+    const GOAL_STORAGE_KEY = 'neurobloom-weekly-goal';
+    const PROFILE_STORAGE_KEY = 'neurobloom-warm-profile';
+    const confettiCanvas = $('confettiCanvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+
+    const DEMO_SEED = [
+      { daysAgo: 80, scenario: 'classroom', moodAfter: 'calm', scores: { overallScore: 62, topicAdherence: 58, turnTaking: 64, questionAsking: 49, emotionalAcknowledgment: 54, conversationInitiation: 55, responseRelevance: 65 }, summary: 'A calm first session with thoughtful answers.', highlights: ['Shared a clear weekend story in class.', 'Stayed with the teacher’s question instead of drifting away.'], improvements: ['Try asking one follow-up question back to a classmate.'], starsEarned: 2, achievements: ['first_session'] },
+      { daysAgo: 73, scenario: 'playground', moodAfter: 'happy', scores: { overallScore: 68, topicAdherence: 67, turnTaking: 69, questionAsking: 61, emotionalAcknowledgment: 63, conversationInitiation: 64, responseRelevance: 70 }, summary: 'More spontaneous and playful this time.', highlights: ['Joined the game by noticing what others were doing.', 'Used a friendly greeting to enter the conversation.'], improvements: ['Keep practicing waiting for a natural pause before jumping in.'], starsEarned: 3, achievements: [] },
+      { daysAgo: 66, scenario: 'grocery_store', moodAfter: 'proud', scores: { overallScore: 72, topicAdherence: 75, turnTaking: 73, questionAsking: 70, emotionalAcknowledgment: 66, conversationInitiation: 68, responseRelevance: 76 }, summary: 'A more confident everyday interaction.', highlights: ['Asked for help finding an item clearly.', 'Answered the cashier directly and stayed on topic.'], improvements: ['Notice facial expressions when asking for help.'], starsEarned: 3, achievements: [] },
+      { daysAgo: 58, scenario: 'bus_stop', moodAfter: 'calm', scores: { overallScore: 74, topicAdherence: 78, turnTaking: 77, questionAsking: 65, emotionalAcknowledgment: 71, conversationInitiation: 69, responseRelevance: 77 }, summary: 'Handled small talk with steady focus.', highlights: ['Answered questions without shutting down the conversation.', 'Kept the exchange moving with relevant replies.'], improvements: ['Try a curiosity question when the other person shares something.'], starsEarned: 3, achievements: [] },
+      { daysAgo: 47, scenario: 'restaurant', moodAfter: 'happy', scores: { overallScore: 79, topicAdherence: 82, turnTaking: 84, questionAsking: 72, emotionalAcknowledgment: 75, conversationInitiation: 74, responseRelevance: 83 }, summary: 'More self-advocacy and clear requests showed up here.', highlights: ['Asked for a quieter spot in a respectful way.', 'Thanked the waiter warmly after being helped.'], improvements: ['Keep practicing emotional acknowledgment when someone apologizes.'], starsEarned: 4, achievements: [] },
+      { daysAgo: 39, scenario: 'classroom', moodAfter: 'proud', scores: { overallScore: 83, topicAdherence: 86, turnTaking: 85, questionAsking: 78, emotionalAcknowledgment: 79, conversationInitiation: 80, responseRelevance: 84 }, summary: 'A strong classroom discussion with steady engagement.', highlights: ['Asked a peer a relevant question about their team.', 'Stayed connected to the group topic throughout.'], improvements: ['Keep stretching into more feeling-based responses.'], starsEarned: 4, achievements: ['topic_champion', 'great_listener', 'streak_3'] },
+      { daysAgo: 28, scenario: 'general', moodAfter: 'excited', scores: { overallScore: 85, topicAdherence: 84, turnTaking: 87, questionAsking: 82, emotionalAcknowledgment: 81, conversationInitiation: 85, responseRelevance: 86 }, summary: 'A warm, balanced conversation with more momentum.', highlights: ['Re-engaged the conversation after a pause.', 'Asked a clear follow-up that kept the exchange going.'], improvements: ['Keep looking for emotional cues in the other speaker’s words.'], starsEarned: 4, achievements: ['conversation_starter', 'response_ace'] },
+      { daysAgo: 20, scenario: 'job_interview', moodAfter: 'tired', scores: { overallScore: 82, topicAdherence: 83, turnTaking: 84, questionAsking: 85, emotionalAcknowledgment: 78, conversationInitiation: 79, responseRelevance: 84 }, summary: 'Handled a harder scenario with thoughtful answers.', highlights: ['Explained strengths in a clear, self-aware way.', 'Asked practical questions at the end of the interview.'], improvements: ['Pause and breathe before longer answers to keep your energy steady.'], starsEarned: 4, achievements: ['question_master'] },
+      { daysAgo: 12, scenario: 'playground', moodAfter: 'happy', scores: { overallScore: 86, topicAdherence: 88, turnTaking: 86, questionAsking: 84, emotionalAcknowledgment: 85, conversationInitiation: 86, responseRelevance: 88 }, summary: 'You sounded more relaxed and socially flexible.', highlights: ['Noticed another player’s excitement and responded warmly.', 'Started a new topic without losing the flow.'], improvements: ['Keep practicing open-ended questions when the group is energetic.'], starsEarned: 5, achievements: ['topic_champion', 'great_listener', 'empathy_star', 'conversation_starter', 'response_ace'] },
+      { daysAgo: 6, scenario: 'restaurant', moodAfter: 'proud', scores: { overallScore: 87, topicAdherence: 89, turnTaking: 88, questionAsking: 83, emotionalAcknowledgment: 86, conversationInitiation: 84, responseRelevance: 89 }, summary: 'A grounded, confident session with warm social responses.', highlights: ['Advocated for comfort while staying kind and clear.', 'Responded directly to the waiter’s support with appreciation.'], improvements: ['Keep experimenting with one extra curiosity question in each scenario.'], starsEarned: 5, achievements: ['topic_champion', 'great_listener', 'empathy_star', 'response_ace'] },
+    ];
+
+    const DEMO_REQUESTS = [
+      { scenario: { type: 'classroom', difficulty: 2, durationMinutes: 15 }, transcript: [{ speaker: 'Teacher', text: 'Alex, would you like to share what you did this weekend?' }, { speaker: 'Alex', text: 'I went to the park with my family and we fed the ducks.' }, { speaker: 'Teacher', text: 'That sounds lovely. What did you enjoy most?' }, { speaker: 'Alex', text: 'I liked seeing the ducks swim. Did anyone else go outside?' }] },
+      { scenario: { type: 'restaurant', difficulty: 3, durationMinutes: 12 }, transcript: [{ speaker: 'Waiter', text: 'Can I start you with a drink?' }, { speaker: 'Alex', text: 'Could I please have some water? Also, is there a quieter table?' }, { speaker: 'Waiter', text: 'Absolutely, I can help with that.' }, { speaker: 'Alex', text: 'Thank you, I really appreciate it.' }] },
+      { scenario: { type: 'job_interview', difficulty: 4, durationMinutes: 18 }, transcript: [{ speaker: 'Interviewer', text: 'What are your strengths?' }, { speaker: 'Alex', text: 'I notice details quickly and I ask questions when I need clarity.' }, { speaker: 'Interviewer', text: 'Do you have any questions for me?' }, { speaker: 'Alex', text: 'Yes. What does a typical day look like here?' }] },
+    ];
+
+    function setDateChip() {
+      $('dateChip').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    function toArray(value) { return Array.isArray(value) ? value : []; }
+    function getWarmProfile() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || '{}');
+        return {
+          preferredName: String(parsed.preferredName || '').trim(),
+          supportStyle: String(parsed.supportStyle || 'gentle'),
+          interests: String(parsed.interests || '').trim(),
+          affirmation: String(parsed.affirmation || '').trim(),
+        };
+      } catch {
+        return { preferredName: '', supportStyle: 'gentle', interests: '', affirmation: '' };
+      }
+    }
+    function applyWarmProfileUI() {
+      const profile = getWarmProfile();
+      $('personaPreferredName').value = profile.preferredName;
+      $('personaSupportStyle').value = profile.supportStyle || 'gentle';
+      $('personaInterests').value = profile.interests;
+      $('personaAffirmation').value = profile.affirmation;
+    }
+    function saveWarmProfile() {
+      const profile = {
+        preferredName: String($('personaPreferredName').value || '').trim(),
+        supportStyle: String($('personaSupportStyle').value || 'gentle').trim(),
+        interests: String($('personaInterests').value || '').trim(),
+        affirmation: String($('personaAffirmation').value || '').trim(),
+      };
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+      if (appState) renderGreeting(appState);
+      toast('💛 Personalization saved');
+    }
+    function slugify(value) { return String(value || '').trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '').replace(/-+/g, '-'); }
+    function setHidden(id, hidden) { const el = $(id); if (el) el.classList.toggle('hidden', hidden); }
+    function toast(message) { const el = $('toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toast._timeout); toast._timeout = setTimeout(() => el.classList.remove('show'), 3200); }
+    function setLive(active, label = null) { $('liveDot').classList.toggle('on', active); $('liveLabel').textContent = label || (active ? 'Live' : 'Offline'); }
+    function renderUserChip(user, playerName = null, demo = false) {
+      if (demo) { $('userAvatar').textContent = 'D'; $('userEmail').textContent = playerName ? `Demo • ${playerName}` : 'Demo mode'; $('signOutButton').classList.add('hidden'); return; }
+      const name = user?.displayName || playerName || user?.email || 'NeuroBloom';
+      $('userAvatar').textContent = String(name).trim().charAt(0).toUpperCase() || 'N';
+      $('userEmail').textContent = user?.email || playerName || 'Signed in';
+      $('signOutButton').classList.toggle('hidden', !user);
+    }
+    function computeAverageScores(sessions) {
+      if (!sessions.length) return emptyAverageScores();
+      const totals = emptyAverageScores();
+      sessions.forEach((session) => SKILL_FIELDS.forEach(([field]) => { totals[field] += Number(session?.scores?.[field] || 0); }));
+      const averages = emptyAverageScores();
+      SKILL_FIELDS.forEach(([field]) => { averages[field] = Math.round(totals[field] / sessions.length); });
+      return averages;
+    }
+    function normalizeDirectState(input, playerNameHint = null) {
+      const data = input && typeof input === 'object' ? input : {};
+      const sessions = toArray(data.sessions).slice().sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+      const latestSession = data.latestSession || sessions.at(-1) || null;
+      return { playerName: data.playerName || latestSession?.playerName || playerNameHint || 'demo-bloom', playerLevel: Number(data.playerLevel) || 1, totalSessions: Number(data.totalSessions) || sessions.length || 0, streakDays: Number(data.streakDays) || 0, overallScore: data.overallScore ?? latestSession?.scores?.overallScore ?? null, totalAchievements: Number(data.totalAchievements) || toArray(data.achievements).length || 0, sessions, latestSession, achievements: toArray(data.achievements), skillsHistory: toArray(data.skillsHistory), analyzing: !!data.analyzing, lastUpdated: data.lastUpdated || latestSession?.processedAt || latestSession?.timestamp || null, averageScores: { ...emptyAverageScores(), ...(data.averageScores || computeAverageScores(sessions)) } };
+    }
+    function normalizePlayerState(input, playerNameHint = null) {
+      if (input?.stats) {
+        const sessions = Object.values(input.sessions || {}).sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+        const latestSession = input.latestSession || sessions.at(-1) || null;
+        const stats = input.stats || {};
+        return { playerName: stats.playerName || latestSession?.playerName || playerNameHint || 'demo-bloom', playerLevel: Number(stats.playerLevel) || 1, totalSessions: Number(stats.totalSessions) || sessions.length || 0, streakDays: Number(stats.streakDays) || 0, overallScore: stats.overallScore ?? latestSession?.scores?.overallScore ?? null, totalAchievements: Number(stats.totalAchievements) || toArray(stats.achievements).length || 0, sessions, latestSession, achievements: toArray(stats.achievements), skillsHistory: toArray(stats.skillsHistory), analyzing: !!stats.analyzing, lastUpdated: stats.lastUpdated || latestSession?.processedAt || latestSession?.timestamp || null, averageScores: { ...emptyAverageScores(), ...(stats.averageScores || computeAverageScores(sessions)) } };
+      }
+      return normalizeDirectState(input, playerNameHint);
+    }
+    function buildDemoState() {
+      const sessions = DEMO_SEED.map((seed, index) => {
+        const timestamp = new Date(Date.now() - seed.daysAgo * 86400000).toISOString();
+        return { id: `demo-${index + 1}`, sessionNumber: index + 1, timestamp, processedAt: timestamp, playerName: 'luna-bloom', scenario: { type: seed.scenario, difficulty: Math.min(5, 2 + (index % 3)), durationMinutes: 12 + (index % 4) * 2, location: null }, transcript: [{ speaker: 'Guide', text: 'Let’s practice a social moment together.' }, { speaker: 'Player', text: seed.summary }], scores: seed.scores, highlights: seed.highlights, improvements: seed.improvements, starsEarned: seed.starsEarned, moodAfter: seed.moodAfter, summary: seed.summary, achievements: seed.achievements };
+      });
+      const achievements = [...new Set(sessions.flatMap((session) => session.achievements))];
+      const latestSession = sessions.at(-1);
+      return { playerName: 'luna-bloom', playerLevel: Math.floor(sessions.length / 5) + 1, totalSessions: sessions.length, streakDays: 4, overallScore: latestSession.scores.overallScore, totalAchievements: achievements.length, sessions, latestSession, achievements, skillsHistory: sessions.slice(-20).map((session) => ({ label: `#${session.sessionNumber}`, timestamp: session.timestamp, overallScore: session.scores.overallScore })), analyzing: false, lastUpdated: latestSession.timestamp, averageScores: computeAverageScores(sessions) };
+    }
+    function updateDashboard(nextState, flash = false) {
+      const previousState = appState
+        ? {
+            totalAchievements: Number(appState.totalAchievements || 0),
+            streakDays: Number(appState.streakDays || 0),
+            playerLevel: Number(appState.playerLevel || 1),
+            overallScore: Number(appState.overallScore || 0),
+            goalReached: goalReached(appState),
+          }
+        : null;
+      const previousCount = appState ? toArray(appState.achievements).length : null;
+      appState = nextState;
+      currentPlayerName = nextState.playerName || currentPlayerName;
+      renderGreeting(nextState); renderStats(nextState, flash); renderRadar(nextState); renderSession(nextState); renderHeatmap(nextState); renderProgress(nextState); renderAchievements(nextState); renderRecommend(nextState); renderBreakdown(nextState); renderCoachDrill(nextState); renderExplainability(nextState); renderReplay(nextState); renderRiskSignals(nextState); renderForecast(nextState); renderGoalProgress(nextState); renderParentSnapshot(nextState); $('analyzingOverlay').classList.toggle('active', !!nextState.analyzing);
+      if (hydrated && previousCount != null && toArray(nextState.achievements).length > previousCount) { celebrateMilestone('Achievement Unlocked', 'A new badge has been earned. Keep building!', '🌟', 120); }
+      else if (flash) toast('🌿 Dashboard updated');
+      if (hydrated) maybeCelebrateProgress(previousState, nextState);
+      hydrated = true;
+    }
+    function renderGreeting(state) {
+      const profile = getWarmProfile();
+      const displayName = profile.preferredName || state.playerName;
+      $('navGreeting').textContent = displayName ? `Welcome back, ${displayName} 👋` : 'Social Skills Journey';
+    }
+    function animVal(el, to, dur = 900, suffix = '') { const from = parseInt(el.textContent, 10) || 0; const start = performance.now(); const step = (now) => { const t = Math.min((now - start) / dur, 1); const ease = 1 - Math.pow(1 - t, 3); el.textContent = `${Math.round(from + (to - from) * ease)}${suffix}`; if (t < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
+    function renderStats(state, flash) {
+      if (state.overallScore != null) { animVal($('valScore'), state.overallScore, 900, '%'); $('barScore').style.width = `${state.overallScore}%`; $('subScore').textContent = scoreLabel(state.overallScore); } else { $('valScore').textContent = '—'; $('barScore').style.width = '0%'; $('subScore').textContent = 'No sessions yet'; }
+      if (state.totalSessions > 0) { animVal($('valSessions'), state.totalSessions); $('subSessions').textContent = `${state.totalSessions} session${state.totalSessions === 1 ? '' : 's'} completed`; $('levelBadge').textContent = `Level ${state.playerLevel}`; } else { $('valSessions').textContent = '—'; $('subSessions').textContent = 'Get started!'; $('levelBadge').textContent = 'Level 1'; }
+      if (state.streakDays > 0) { animVal($('valStreak'), state.streakDays); $('streakUnit').textContent = 'days'; $('streakEmoji').textContent = state.streakDays >= 7 ? '🔥🔥' : state.streakDays >= 3 ? '🔥' : '✨'; $('subStreak').textContent = state.streakDays >= 7 ? 'On fire! Amazing!' : 'Great consistency!'; } else { $('valStreak').textContent = '—'; $('streakUnit').textContent = ''; $('streakEmoji').textContent = ''; $('subStreak').textContent = 'Start your streak!'; }
+      if (state.totalAchievements > 0) { animVal($('valAchievements'), state.totalAchievements); $('achievEmojiRow').textContent = state.achievements.slice(0, 4).map((id) => ACH_META[id]?.e || '🏅').join(' '); $('subAchievements').textContent = `${state.totalAchievements} unlocked`; } else { $('valAchievements').textContent = '—'; $('achievEmojiRow').textContent = ''; $('subAchievements').textContent = 'Play to unlock'; }
+      if (flash) ['card-score', 'card-sessions', 'card-streak', 'card-achievements'].forEach((id) => { const el = $(id); el.classList.remove('flash-update'); void el.offsetWidth; el.classList.add('flash-update'); });
+    }
+    function scoreLabel(value) { if (value >= 90) return 'Outstanding! 🌟'; if (value >= 80) return 'Excellent work! ✨'; if (value >= 70) return 'Great progress! 👍'; if (value >= 60) return 'Good effort! 💪'; return 'Keep going! 🌱'; }
+    function renderRadar(state) {
+      const session = state.latestSession; const hasData = !!session?.scores; setHidden('radarEmpty', hasData); if (!hasData) return;
+      const labels = SKILL_FIELDS.map(([, label]) => label); const fields = SKILL_FIELDS.map(([field]) => field); const latest = fields.map((field) => session.scores[field] ?? 0); const averages = fields.map((field) => state.averageScores[field] ?? 0);
+      const config = { type: 'radar', data: { labels, datasets: [{ label: 'Latest', data: latest, backgroundColor: 'rgba(78,138,103,0.18)', borderColor: '#4E8A67', borderWidth: 2.5, pointBackgroundColor: '#4E8A67', pointBorderColor: '#FFFFFE', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 9 }, { label: 'Average', data: averages, backgroundColor: 'rgba(196,113,94,0.08)', borderColor: 'rgba(196,113,94,0.55)', borderDash: [5, 5], borderWidth: 1.5, pointBackgroundColor: '#C4715E', pointBorderColor: '#FFFFFE', pointBorderWidth: 2, pointRadius: 3, pointHoverRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, font: { family: "'Nunito',sans-serif", size: 10 }, color: '#A8998C', backdropColor: 'transparent' }, grid: { color: 'rgba(168,153,140,0.18)' }, angleLines: { color: 'rgba(168,153,140,0.18)' }, pointLabels: { font: { family: "'Nunito',sans-serif", size: 12, weight: '700' }, color: '#6B5E52' } } }, plugins: { legend: { display: false }, tooltip: { bodyFont: { family: "'Nunito',sans-serif" }, titleFont: { family: "'Nunito',sans-serif" }, callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.r}` } } }, animation: { duration: 700, easing: 'easeInOutQuart' } } };
+      if (!radarChart) radarChart = new Chart($('radarChart').getContext('2d'), config); else { radarChart.data.datasets[0].data = latest; radarChart.data.datasets[1].data = averages; radarChart.update('active'); }
+    }
+    function fillList(id, items) { const el = $(id); el.innerHTML = ''; items.forEach((item) => { const li = document.createElement('li'); li.textContent = item; el.appendChild(li); }); }
+    function renderSession(state) {
+      const session = state.latestSession; setHidden('sessionEmpty', !!session); setHidden('sessionContent', !session); if (!session) return;
+      const scenario = SCENARIOS[session.scenario?.type] || SCENARIOS.general; $('scenarioChip').innerHTML = `<span>${scenario.icon}</span>&nbsp;${scenario.name}`;
+      $('sessionMeta').textContent = [timeAgo(session.timestamp), session.scenario?.durationMinutes ? `${session.scenario.durationMinutes} min` : null, session.scenario?.difficulty ? `Difficulty ${session.scenario.difficulty}/5` : null].filter(Boolean).join(' · ');
+      const stars = Math.max(0, Math.min(5, Number(session.starsEarned || 0))); $('starsDisplay').innerHTML = `<span class="star-on">${'★'.repeat(stars)}</span><span class="star-off">${'☆'.repeat(5 - stars)}</span>`;
+      const mood = MOOD_META[session.moodAfter]; if (mood) { $('moodDisplay').innerHTML = `<span class="mood-emoji">${mood.e}</span><span>${mood.l}</span>`; $('moodDisplay').classList.remove('hidden'); } else $('moodDisplay').classList.add('hidden');
+      if (session.summary) { $('summaryPill').textContent = `💬 ${session.summary}`; $('summaryPill').classList.remove('hidden'); } else $('summaryPill').classList.add('hidden');
+      fillList('highlightsList', toArray(session.highlights)); setHidden('highlightsSec', !toArray(session.highlights).length); fillList('improvementsList', toArray(session.improvements)); setHidden('improvementsSec', !toArray(session.improvements).length);
+      if (session.transcript) { const raw = Array.isArray(session.transcript) ? session.transcript.map((entry) => `${entry.speaker || 'Speaker'}: ${entry.text}`).join('\n') : String(session.transcript); $('transcriptBox').textContent = raw.slice(0, 420); $('transcriptSec').classList.remove('hidden'); } else $('transcriptSec').classList.add('hidden');
+      renderMoodTimeline(state.sessions);
+    }
+    function renderMoodTimeline(sessions) { const moodSessions = sessions.filter((session) => session.moodAfter).slice(-10); const container = $('moodTimeline'); container.innerHTML = ''; setHidden('moodTimelineWrap', !moodSessions.length); moodSessions.forEach((session) => { const mood = MOOD_META[session.moodAfter] || { e: '🙂', l: 'Mood' }; const dot = document.createElement('div'); dot.className = 'mood-dot'; dot.textContent = mood.e; dot.title = `${new Date(session.timestamp).toLocaleDateString()} • ${mood.l}`; container.appendChild(dot); }); }
+    function renderHeatmap(state) {
+      const counts = new Map(); state.sessions.forEach((session) => { const key = new Date(session.timestamp).toISOString().slice(0, 10); counts.set(key, (counts.get(key) || 0) + 1); });
+      const days = []; for (let index = 83; index >= 0; index -= 1) { const date = new Date(); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() - index); days.push(date); }
+      $('heatmapWeeks').innerHTML = days.filter((_, index) => index % 7 === 0).map((date, index) => `<span>${index % 2 === 0 ? date.toLocaleDateString('en-US', { month: 'short' }) : ''}</span>`).join('');
+      $('heatmapGrid').innerHTML = days.map((date) => { const key = date.toISOString().slice(0, 10); const count = counts.get(key) || 0; const level = count >= 2 ? 'level-2' : count === 1 ? 'level-1' : ''; const label = `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}: ${count} session${count === 1 ? '' : 's'}`; return `<div class="heatmap-cell ${level}" title="${label}" aria-label="${label}"></div>`; }).join('');
+    }
+    function renderProgress(state) {
+      const history = toArray(state.skillsHistory); setHidden('progressEmpty', history.length > 0); if (!history.length) return;
+      const labels = history.map((entry) => entry.label); const values = history.map((entry) => entry.overallScore);
+      if (!lineChart) {
+        const ctx = $('progressChart').getContext('2d'); const gradient = ctx.createLinearGradient(0, 0, 0, 250); gradient.addColorStop(0, 'rgba(196,113,94,0.22)'); gradient.addColorStop(1, 'rgba(196,113,94,0)');
+        lineChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Overall Score', data: values, borderColor: '#C4715E', backgroundColor: gradient, fill: true, tension: 0.44, borderWidth: 2.5, pointBackgroundColor: '#C4715E', pointBorderColor: '#FFFFFE', pointBorderWidth: 2.5, pointRadius: 6, pointHoverRadius: 10 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100, grid: { color: 'rgba(168,153,140,0.15)', drawBorder: false }, border: { dash: [4, 4], display: false }, ticks: { font: { family: "'Nunito',sans-serif", size: 11 }, color: '#A8998C', padding: 8 } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { family: "'Nunito',sans-serif", size: 11 }, color: '#A8998C', padding: 8 } } }, plugins: { legend: { display: false }, tooltip: { bodyFont: { family: "'Nunito',sans-serif" }, titleFont: { family: "'Nunito',sans-serif" }, callbacks: { label: (ctx) => `Score: ${ctx.parsed.y}` }, backgroundColor: 'rgba(28,21,16,0.85)', padding: 12, cornerRadius: 12 } }, interaction: { intersect: false, mode: 'index' }, animation: { duration: 800, easing: 'easeInOutQuart' } } });
+      } else { lineChart.data.labels = labels; lineChart.data.datasets[0].data = values; lineChart.update('active'); }
+    }
+    function renderAchievements(state) { const el = $('achievementsList'); if (!state.achievements.length) { el.innerHTML = '<div class="no-data-msg">No achievements yet 🌱</div>'; return; } el.innerHTML = ''; state.achievements.forEach((id, index) => { const meta = ACH_META[id] || { e: '🏅', l: id }; const pill = document.createElement('div'); pill.className = 'ach-pill'; pill.style.animationDelay = `${index * 0.05}s`; pill.innerHTML = `<span>${meta.e}</span><span>${meta.l}</span>`; el.appendChild(pill); }); }
+    function weakestSkillField(state) {
+      const source = state.totalSessions ? state.averageScores : emptyAverageScores();
+      let weakest = SKILL_FIELDS[0][0];
+      let score = 101;
+      SKILL_FIELDS.forEach(([field]) => {
+        const value = Number(source[field] || 0);
+        if (value < score) {
+          score = value;
+          weakest = field;
+        }
+      });
+      return { field: weakest, score };
+    }
+    function renderRecommend(state) {
+      if (!state.totalSessions) { $('recIcon').textContent = '🏫'; $('recName').textContent = 'Start with Classroom'; $('recDesc').textContent = 'A great first scenario to practise everyday social interactions.'; $('recDiff').textContent = '★★☆☆☆'; return; }
+      const tried = new Set(state.sessions.map((session) => session.scenario?.type));
+      const { field: weakField } = weakestSkillField(state);
+      const biasMap = {
+        topicAdherence: ['classroom', 'job_interview'],
+        turnTaking: ['bus_stop', 'playground'],
+        questionAsking: ['job_interview', 'classroom'],
+        emotionalAcknowledgment: ['restaurant', 'playground'],
+        conversationInitiation: ['playground', 'bus_stop'],
+        responseRelevance: ['classroom', 'restaurant'],
+      };
+      const preferred = biasMap[weakField] || ['classroom'];
+      const chosen = preferred.find((scenario) => !tried.has(scenario)) || preferred[0] || 'general';
+      const rec = SCENARIOS[chosen] || SCENARIOS.general;
+      const weakLabel = (SKILL_FIELDS.find(([field]) => field === weakField) || [null, 'core skill'])[1];
+      const diff = Math.min(Math.floor(state.totalSessions / 3) + 1, 5);
+      $('recIcon').textContent = rec.icon;
+      $('recName').textContent = rec.name;
+      $('recDesc').textContent = `${rec.desc} Focus target: ${weakLabel}.`;
+      $('recDiff').textContent = '★'.repeat(diff) + '☆'.repeat(5 - diff);
+    }
+    function explainabilityRows(state) {
+      const session = state.latestSession;
+      if (!session?.scores) return [];
+      const transcript = Array.isArray(session.transcript) ? session.transcript : [];
+      const playerLines = transcript.filter((entry) => String(entry?.speaker || '').toLowerCase().includes('player') || String(entry?.speaker || '').toLowerCase().includes('alex')).map((entry) => String(entry.text || '')).filter(Boolean);
+      const anyQuestion = playerLines.find((line) => line.includes('?'));
+      const empathyLine = playerLines.find((line) => /thank|sorry|appreciate|feel|understand/i.test(line));
+      const insightByField = {
+        topicAdherence: 'Stayed aligned with the scenario context rather than drifting off-topic.',
+        turnTaking: 'Waited for conversational openings and avoided interruption patterns.',
+        questionAsking: anyQuestion ? 'Used at least one curiosity question to keep dialogue moving.' : 'Few explicit question cues appeared in the transcript.',
+        emotionalAcknowledgment: empathyLine ? 'Used language that recognizes emotion or support from others.' : 'Needs more emotion-labeling words like “I get that” or “that sounds hard”.',
+        conversationInitiation: 'Showed initiative in starting or re-opening parts of the conversation.',
+        responseRelevance: 'Responses matched what the other speaker just said and stayed coherent.',
+      };
+      return SKILL_FIELDS.map(([field, label]) => {
+        const score = Number(session.scores[field] || 0);
+        const status = score >= 80 ? 'good' : score >= 60 ? 'mid' : 'low';
+        const statusLabel = score >= 80 ? 'Strength' : score >= 60 ? 'Building' : 'Focus';
+        const evidence = playerLines[0] ? `Evidence sample: "${playerLines[0].slice(0, 90)}${playerLines[0].length > 90 ? '…' : ''}"` : 'Evidence sample: Transcript details unavailable.';
+        return { label, score, status, statusLabel, reason: insightByField[field], evidence };
+      });
+    }
+    function renderExplainability(state) {
+      const rows = explainabilityRows(state);
+      const el = $('explainRows');
+      if (!rows.length) {
+        el.innerHTML = '<div class="explain-item">Play a session to see explanations.</div>';
+        return;
+      }
+      el.innerHTML = rows.map((row) => `<div class="explain-item"><div class="explain-top"><strong>${row.label}</strong><span class="status-pill ${row.status}">${row.statusLabel} · ${row.score}%</span></div><div class="muted-copy">${row.reason}</div><div class="muted-copy" style="margin-top:4px">${row.evidence}</div></div>`).join('');
+    }
+    function replayRows(state) {
+      const transcript = Array.isArray(state.latestSession?.transcript) ? state.latestSession.transcript : [];
+      return transcript.slice(0, 8).map((entry) => {
+        const speaker = String(entry.speaker || 'Speaker');
+        const text = String(entry.text || '');
+        let note = 'Keep this tone; it supports steady conversation flow.';
+        if (/\?/i.test(text)) note = 'Great: a question helps keep dialogue reciprocal.';
+        else if (/thank|appreciate|sorry/i.test(text)) note = 'Strong empathy signal detected here.';
+        else if (/i |we |my /i.test(text) && text.length > 70) note = 'Long response: try pausing to invite the other speaker in.';
+        return { speaker, text, note };
+      });
+    }
+    function renderReplay(state) {
+      const rows = replayRows(state);
+      const el = $('replayRows');
+      if (!rows.length) {
+        el.innerHTML = '<div class="replay-row">No replay yet.</div>';
+        return;
+      }
+      el.innerHTML = rows.map((row) => `<div class="replay-row"><div class="replay-speaker">${row.speaker}</div><div>${row.text}</div><div class="replay-note">${row.note}</div></div>`).join('');
+    }
+    function buildDrill(state) {
+      const { field } = weakestSkillField(state);
+      const drills = {
+        topicAdherence: { title: 'Stay-On-Topic Bridge', steps: ['Answer with one sentence tied to the current topic.', 'Add one bridge phrase: “about that…” or “also on that point…”.', 'Avoid starting a brand-new subject for 2 turns.'], prompt: 'Coach me through a 3-minute stay-on-topic drill with one roleplay example.' },
+        turnTaking: { title: 'Pause-Then-Reply Drill', steps: ['Count a 1-second pause before replying.', 'Reply in one concise sentence first.', 'Invite the other person with: “What do you think?”'], prompt: 'Coach me through a turn-taking drill with short conversational cues.' },
+        questionAsking: { title: 'Curiosity Question Sprint', steps: ['After each reply, ask one open question.', 'Use starters: “How…”, “What was that like…”.', 'Aim for 3 questions in one conversation.'], prompt: 'Give me a question-asking drill and examples I can reuse.' },
+        emotionalAcknowledgment: { title: 'Emotion Mirror Practice', steps: ['Spot one emotion word from the other speaker.', 'Reply with: “That sounds …”.', 'Then ask one supportive follow-up question.'], prompt: 'Coach me to acknowledge emotions with natural phrasing.' },
+        conversationInitiation: { title: 'Start-Strong Challenge', steps: ['Open with a greeting + context sentence.', 'Add one invitation question.', 'Use one re-entry phrase after silence: “By the way…”.'], prompt: 'Train me on conversation starts and re-entry after awkward pauses.' },
+        responseRelevance: { title: 'Answer-Then-Add Pattern', steps: ['First, answer exactly what was asked.', 'Second, add one short related detail.', 'Third, avoid unrelated examples unless asked.'], prompt: 'Coach me on keeping responses tightly relevant in social conversations.' },
+      };
+      return drills[field] || drills.topicAdherence;
+    }
+    function renderCoachDrill(state) {
+      const drill = buildDrill(state);
+      const profile = getWarmProfile();
+      $('drillTitle').textContent = drill.title;
+      $('drillSteps').innerHTML = drill.steps.map((step) => `<li>${step}</li>`).join('');
+      $('askAriaDrill').dataset.prompt = drill.prompt;
+      const tone = profile.supportStyle ? `Tone: ${profile.supportStyle}.` : '';
+      $('drillMeta').textContent = state.totalSessions ? `Generated from your current focus area. ${tone} Sessions completed: ${state.totalSessions}.` : 'Complete a session to personalize this drill.';
+    }
+    function getGoalTarget() {
+      const parsed = Number(localStorage.getItem(GOAL_STORAGE_KEY) || 3);
+      return Number.isFinite(parsed) ? Math.max(1, Math.min(14, Math.round(parsed))) : 3;
+    }
+    function countSessionsThisWeek(sessions) {
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 6 * 86400000);
+      weekAgo.setHours(0, 0, 0, 0);
+      return sessions.filter((session) => new Date(session.timestamp || session.processedAt || 0) >= weekAgo).length;
+    }
+    function streakMultiplier(streakDays) {
+      if (streakDays >= 14) return 2.0;
+      if (streakDays >= 7) return 1.5;
+      if (streakDays >= 3) return 1.2;
+      return 1.0;
+    }
+    function renderGoalProgress(state) {
+      const target = getGoalTarget();
+      $('goalTarget').value = target;
+      const done = countSessionsThisWeek(toArray(state.sessions));
+      const pct = Math.max(0, Math.min(100, Math.round((done / target) * 100)));
+      $('goalMeterFill').style.width = `${pct}%`;
+      $('goalStatus').textContent = `${done}/${target} sessions this week`;
+      $('streakMultiplier').textContent = `Streak multiplier: ${streakMultiplier(Number(state.streakDays || 0)).toFixed(1)}x`;
+    }
+    function goalReached(state) {
+      const target = getGoalTarget();
+      return countSessionsThisWeek(toArray(state.sessions)) >= target;
+    }
+    function celebrateMilestone(title, subtitle, emoji = '🎉', intensity = 90) {
+      launchConfetti(intensity, 3400);
+      const layer = $('celebrationLayer');
+      if (!layer) return;
+      const badge = document.createElement('div');
+      badge.className = 'celebration-badge';
+      badge.innerHTML = `<div class="celebration-title">${emoji} ${title}</div><div class="celebration-sub">${subtitle}</div>`;
+      layer.appendChild(badge);
+
+      const sparkles = ['✨', '🌟', '💫', '🎉', '🎊'];
+      for (let index = 0; index < 14; index += 1) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        spark.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
+        const startX = 50 + (Math.random() * 16 - 8);
+        const startY = 22 + (Math.random() * 8 - 4);
+        spark.style.left = `${startX}%`;
+        spark.style.top = `${startY}%`;
+        spark.style.setProperty('--dx', `${Math.random() * 220 - 110}px`);
+        spark.style.setProperty('--dy', `${Math.random() * 120 - 70}px`);
+        spark.style.animationDelay = `${Math.random() * 0.25}s`;
+        layer.appendChild(spark);
+        setTimeout(() => spark.remove(), 1300);
+      }
+
+      setTimeout(() => badge.remove(), 2500);
+    }
+    function maybeCelebrateProgress(previousState, nextState) {
+      if (!previousState) return;
+      if (Number(nextState.playerLevel || 1) > previousState.playerLevel) {
+        celebrateMilestone(`Level ${nextState.playerLevel}!`, 'You just leveled up through consistent practice.', '🚀', 130);
+      }
+      if (Number(nextState.streakDays || 0) >= 7 && previousState.streakDays < 7) {
+        celebrateMilestone('Week Streak', 'Seven-day consistency unlocked. That is huge progress.', '🔥', 110);
+      }
+      if (Number(nextState.streakDays || 0) >= 14 && previousState.streakDays < 14) {
+        celebrateMilestone('Two-Week Streak', 'Your habits are becoming strong and sustainable.', '🏆', 130);
+      }
+      if (goalReached(nextState) && !previousState.goalReached) {
+        celebrateMilestone('Goal Completed', 'Weekly goal reached. Keep the momentum going!', '🎯', 105);
+      }
+      if (Number(nextState.overallScore || 0) >= 90 && previousState.overallScore < 90) {
+        celebrateMilestone('Personal Best', 'Outstanding score milestone achieved.', '🌈', 140);
+      }
+    }
+    function forecastFromHistory(history) {
+      if (history.length < 4) return null;
+      const ys = history.map((entry) => Number(entry.overallScore || 0));
+      const n = ys.length;
+      let sumX = 0; let sumY = 0; let sumXY = 0; let sumXX = 0;
+      for (let i = 0; i < n; i += 1) {
+        sumX += i;
+        sumY += ys[i];
+        sumXY += i * ys[i];
+        sumXX += i * i;
+      }
+      const denom = (n * sumXX) - (sumX * sumX);
+      if (!denom) return null;
+      const slope = ((n * sumXY) - (sumX * sumY)) / denom;
+      const intercept = (sumY - (slope * sumX)) / n;
+      const futureX = n + 4;
+      const predicted = Math.max(0, Math.min(100, Math.round((slope * futureX) + intercept)));
+      return { predicted, slope };
+    }
+    function renderForecast(state) {
+      const forecast = forecastFromHistory(toArray(state.skillsHistory));
+      if (!forecast) {
+        $('forecastValue').textContent = '—';
+        $('forecastTrend').textContent = 'Waiting for data';
+        $('forecastTrend').classList.remove('down');
+        $('forecastRange').textContent = 'Need at least 4 sessions to forecast.';
+        return;
+      }
+      $('forecastValue').textContent = `${forecast.predicted}%`;
+      const up = forecast.slope >= 0;
+      $('forecastTrend').textContent = up ? `Trending up (+${Math.abs(forecast.slope).toFixed(1)}/session)` : `Needs support (${forecast.slope.toFixed(1)}/session)`;
+      $('forecastTrend').classList.toggle('down', !up);
+      $('forecastRange').textContent = `Projected score in about 2 weeks of steady practice: ${forecast.predicted}%.`;
+    }
+    function computeRiskSignals(state) {
+      const signals = [];
+      const sessions = toArray(state.sessions);
+      if (sessions.length >= 6) {
+        const recent = sessions.slice(-3).map((item) => Number(item?.scores?.overallScore || 0));
+        const previous = sessions.slice(-6, -3).map((item) => Number(item?.scores?.overallScore || 0));
+        const avg = (arr) => arr.reduce((sum, v) => sum + v, 0) / Math.max(arr.length, 1);
+        if (avg(recent) + 8 < avg(previous)) {
+          signals.push({ level: 'high', text: 'Recent scores dipped compared with prior sessions. Suggest a lower-difficulty confidence rebuild session next.' });
+        }
+      }
+      const tiredCount = sessions.slice(-5).filter((item) => item?.moodAfter === 'tired').length;
+      if (tiredCount >= 2) signals.push({ level: 'medium', text: 'Multiple recent sessions ended with tired mood. Suggest shorter rounds and more breaks.' });
+      const weak = weakestSkillField(state);
+      if (weak.score < 60) {
+        const weakLabel = (SKILL_FIELDS.find(([field]) => field === weak.field) || [null, 'target skill'])[1];
+        signals.push({ level: 'medium', text: `${weakLabel} is currently the main support area. Keep next sessions focused there.` });
+      }
+      if (!signals.length) signals.push({ level: 'low', text: 'No major risk signal. Keep current routine and celebrate consistency.' });
+      return signals;
+    }
+    function renderRiskSignals(state) {
+      const signals = computeRiskSignals(state);
+      $('riskList').innerHTML = signals.map((signal) => `<div class="risk-item ${signal.level === 'high' ? 'high' : signal.level === 'medium' ? 'medium' : ''}">${signal.text}</div>`).join('');
+    }
+    function renderParentSnapshot(state) {
+      const sessions = toArray(state.sessions);
+      if (!sessions.length) {
+        $('parentSnapshot').textContent = 'Generate a report to see export insights.';
+        return;
+      }
+      const weak = weakestSkillField(state);
+      const weakLabel = (SKILL_FIELDS.find(([field]) => field === weak.field) || [null, 'focus'])[1];
+      const forecast = forecastFromHistory(toArray(state.skillsHistory));
+      const lines = [
+        `Sessions: ${state.totalSessions} | Streak: ${state.streakDays} days | Current score: ${state.overallScore ?? '—'}%`,
+        `Primary growth focus: ${weakLabel}.`,
+        forecast ? `2-week projected score: ${forecast.predicted}%.` : 'Forecast pending more sessions.',
+      ];
+      $('parentSnapshot').textContent = lines.join(' ');
+    }
+    function buildExportReport() {
+      const snapshot = $('parentSnapshot').textContent || '';
+      const body = latestReportText || $('reportOutput').textContent || '';
+      return `${body}\n\n---\nNeuroBloom Snapshot\n${snapshot}\nGenerated: ${new Date().toLocaleString()}`;
+    }
+    function renderBreakdown(state) { const el = $('breakdownRows'); el.innerHTML = ''; SKILL_FIELDS.forEach(([field, label]) => { const score = state.totalSessions > 0 ? state.averageScores[field] || 0 : 0; const row = document.createElement('div'); row.innerHTML = `<div class="breakdown-row-top"><span class="breakdown-lbl">${label}</span><span class="breakdown-num">${state.totalSessions > 0 ? score : '—'}</span></div><div class="breakdown-bar"><div class="breakdown-fill" style="width:${score}%"></div></div>`; el.appendChild(row); }); }
+    function timeAgo(iso) { const delta = Date.now() - new Date(iso).getTime(); const minutes = Math.floor(delta / 60000); if (minutes < 1) return 'Just now'; if (minutes < 60) return `${minutes}m ago`; const hours = Math.floor(minutes / 60); if (hours < 24) return `${hours}h ago`; return `${Math.floor(hours / 24)}d ago`; }
+    function showBanner(message) { $('firebaseBanner').textContent = message; $('firebaseBanner').classList.add('show'); }
+    function hideBanner() { $('firebaseBanner').classList.remove('show'); }
+    function openChat() { chatOpen = true; $('chatPanel').classList.add('open'); $('chatInput').focus(); }
+    function closeChat() { chatOpen = false; $('chatPanel').classList.remove('open'); }
+    function appendChatBubble(role, text, typing = false) { const bubble = document.createElement('div'); bubble.className = `chat-bubble ${role}`; if (typing) bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>'; else bubble.textContent = text; $('chatMessages').appendChild(bubble); $('chatMessages').scrollTop = $('chatMessages').scrollHeight; return bubble; }
+    function buildPersonalizedCoachMessage(message) {
+      const profile = getWarmProfile();
+      const strengths = appState?.averageScores ? SKILL_FIELDS.map(([field, label]) => ({ label, score: Number(appState.averageScores[field] || 0) })).sort((a, b) => b.score - a.score).slice(0, 2).map((item) => `${item.label} (${item.score}%)`).join(', ') : 'N/A';
+      const learnerName = profile.preferredName || currentPlayerName || appState?.playerName || 'the learner';
+      return `Please respond warmly and inclusively for ${learnerName}. Support style: ${profile.supportStyle || 'gentle'}. Interests: ${profile.interests || 'not specified'}. Preferred affirmation: ${profile.affirmation || 'confidence-building'}. Strengths to acknowledge first: ${strengths}. User request: ${message}`;
+    }
+    async function sendCoachMessage(message) {
+      if (!message.trim() || coachLoading) return;
+      if (!currentPlayerName && !appState?.playerName) { toast('Create or load a player name first.'); return; }
+      coachLoading = true; appendChatBubble('user', message.trim()); const typingBubble = appendChatBubble('coach', '', true);
+      try {
+        const response = await fetch('/api/coach-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playerName: currentPlayerName || appState.playerName, message: buildPersonalizedCoachMessage(message.trim()), personalization: getWarmProfile(), sessionHistory: appState?.sessions?.slice(-5).map((session) => ({ scenario: session.scenario?.type, overallScore: session.scores?.overallScore, moodAfter: session.moodAfter, summary: session.summary })) || [] }) });
+        const payload = await response.json(); typingBubble.remove(); if (!response.ok) throw new Error(payload.message || 'Coach Aria could not reply just now.'); appendChatBubble('coach', payload.reply || 'I’m here whenever you’d like to reflect together.');
+      } catch (error) { typingBubble.remove(); appendChatBubble('coach', error.message || 'I’m having trouble responding right now.'); } finally { coachLoading = false; }
+    }
+    async function generateReport(openModal = true) {
+      if (reportLoading) return;
+      if (!currentPlayerName && !appState?.playerName) { toast('Create or load a player name first.'); return; }
+      reportLoading = true; $('reportOutput').textContent = 'Generating a warm parent report…'; if (openModal) $('reportModal').classList.remove('hidden');
+      try {
+        const response = await fetch('/api/generate-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playerName: currentPlayerName || appState.playerName }) });
+        const payload = await response.json(); if (!response.ok) throw new Error(payload.message || 'Report generation failed.'); latestReportText = payload.report || 'No report was returned.'; $('reportOutput').textContent = latestReportText;
+      } catch (error) { latestReportText = ''; $('reportOutput').textContent = error.message || 'Report generation failed.'; } finally { reportLoading = false; }
+    }
+    function resizeConfettiCanvas() { confettiCanvas.width = window.innerWidth * window.devicePixelRatio; confettiCanvas.height = window.innerHeight * window.devicePixelRatio; confettiCanvas.style.width = `${window.innerWidth}px`; confettiCanvas.style.height = `${window.innerHeight}px`; confettiCtx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0); }
+    function launchConfetti(intensity = 80, duration = 3000) { resizeConfettiCanvas(); const colors = ['#4E8A67', '#C4715E', '#C9963A', '#8B7EC4']; const particles = Array.from({ length: intensity }, () => ({ x: Math.random() * window.innerWidth, y: -20 - Math.random() * 120, size: 6 + Math.random() * 8, speedY: 2 + Math.random() * 4, speedX: -2 + Math.random() * 4, rotation: Math.random() * Math.PI, rotationSpeed: -0.12 + Math.random() * 0.24, alpha: 1, color: colors[Math.floor(Math.random() * colors.length)] })); const start = performance.now(); if (confettiFrame) cancelAnimationFrame(confettiFrame); const draw = (now) => { confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight); const elapsed = now - start; particles.forEach((particle) => { particle.x += particle.speedX; particle.y += particle.speedY; particle.rotation += particle.rotationSpeed; particle.alpha = Math.max(0, 1 - elapsed / duration); confettiCtx.save(); confettiCtx.globalAlpha = particle.alpha; confettiCtx.translate(particle.x, particle.y); confettiCtx.rotate(particle.rotation); confettiCtx.fillStyle = particle.color; confettiCtx.fillRect(-particle.size / 2, -particle.size / 2, particle.size, particle.size * 0.7); confettiCtx.restore(); }); if (elapsed < duration) confettiFrame = requestAnimationFrame(draw); else confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight); }; confettiFrame = requestAnimationFrame(draw); }
+    async function savePlayerName(event) {
+      event.preventDefault(); if (!database || !currentUser) return;
+      const input = $('playerNameSetup'); const playerName = slugify(input.value); $('playerModalError').textContent = ''; input.value = playerName; if (!playerName) { $('playerModalError').textContent = 'Please enter a valid player name.'; return; }
+      const button = $('savePlayerNameButton'); button.disabled = true; button.textContent = 'Saving…';
+      try {
+        const keyRef = ref(database, `playerNames/${playerName}`); const keySnap = await get(keyRef); if (keySnap.exists() && keySnap.val() !== currentUser.uid) { $('playerModalError').textContent = 'That player name is already being used.'; return; }
+        const userSnap = await get(ref(database, `users/${currentUser.uid}`)); const currentData = userSnap.val() || {}; const now = new Date().toISOString();
+        await Promise.all([set(ref(database, `users/${currentUser.uid}`), { ...currentData, uid: currentUser.uid, fullName: currentUser.displayName || currentData.fullName || '', email: currentUser.email || currentData.email || '', playerName, createdAt: currentData.createdAt || now, updatedAt: now }), set(keyRef, currentUser.uid)]);
+        $('playerModal').classList.add('hidden'); connectRealtimePlayer(playerName);
+      } catch (error) { $('playerModalError').textContent = error.message || 'Could not save player name just now.'; } finally { button.disabled = false; button.textContent = 'Save player name'; }
+    }
+    async function triggerDemoSession() { const request = DEMO_REQUESTS[Math.floor(Math.random() * DEMO_REQUESTS.length)]; const playerName = currentPlayerName || appState?.playerName || 'alex'; $('demoBtn').disabled = true; $('demoBtn').textContent = '…'; try { const response = await fetch('/api/input-results', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...request, playerName, sessionId: `demo-${Date.now()}`, totalSessions: (appState?.totalSessions || 0) + 1 }) }); const payload = await response.json(); if (!response.ok) throw new Error(payload.message || 'Demo session failed.'); toast('✨ Demo session submitted'); await refreshLocalState(); } catch (error) { toast(error.message || 'Could not reach the API'); } finally { $('demoBtn').disabled = false; $('demoBtn').textContent = '✨ Demo Session'; } }
+    async function refreshLocalState() { try { const response = await fetch('/api/state'); const payload = await response.json(); const normalised = normalizePlayerState(payload, appState?.playerName || 'luna-bloom'); const hasRealData = normalised.totalSessions > 0 || normalised.analyzing; updateDashboard(hasRealData ? normalised : buildDemoState(), hasRealData && hydrated); } catch { updateDashboard(buildDemoState(), false); } }
+    function enterDemoMode() { showBanner('Firebase is not configured yet. You are seeing a warm demo view, and local polling will keep checking /api/state every 5 seconds.'); renderUserChip(null, 'demo-bloom', true); setLive(false, 'Demo Mode'); $('demoBtn').classList.remove('hidden'); updateDashboard(buildDemoState(), false); refreshLocalState(); pollInterval = window.setInterval(refreshLocalState, 5000); }
+    function connectRealtimePlayer(playerName) { currentPlayerName = playerName; renderUserChip(currentUser, playerName, false); setLive(true, 'Live'); hideBanner(); $('demoBtn').classList.add('hidden'); if (pollInterval) { clearInterval(pollInterval); pollInterval = null; } if (unsubscribePlayer) unsubscribePlayer(); let firstSnapshot = true; unsubscribePlayer = onValue(ref(database, `players/${playerName}`), (snapshot) => { const next = snapshot.val(); const normalised = normalizePlayerState(next || {}, playerName); updateDashboard(normalised.totalSessions ? normalised : normalizePlayerState({}, playerName), !firstSnapshot); firstSnapshot = false; }); }
+
+    $('coachFab').addEventListener('click', () => { if (chatOpen) closeChat(); else openChat(); });
+    $('chatClose').addEventListener('click', closeChat);
+    $('chatForm').addEventListener('submit', async (event) => { event.preventDefault(); const input = $('chatInput'); const message = input.value; input.value = ''; await sendCoachMessage(message); });
+    $('reportButton').addEventListener('click', () => { $('reportModal').classList.remove('hidden'); generateReport(false); });
+    $('closeReportModal').addEventListener('click', () => $('reportModal').classList.add('hidden'));
+    $('copyReportButton').addEventListener('click', async () => { await navigator.clipboard.writeText($('reportOutput').textContent); toast('📋 Report copied'); });
+    $('downloadReportButton').addEventListener('click', () => {
+      const text = buildExportReport();
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const name = currentPlayerName || appState?.playerName || 'player';
+      a.href = url;
+      a.download = `${name}-neurobloom-report.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast('⬇️ Report downloaded');
+    });
+    $('refreshReportButton').addEventListener('click', () => generateReport(false));
+    $('saveGoalBtn').addEventListener('click', () => {
+      const target = Math.max(1, Math.min(14, Number($('goalTarget').value) || 3));
+      localStorage.setItem(GOAL_STORAGE_KEY, String(target));
+      $('goalTarget').value = target;
+      if (appState) renderGoalProgress(appState);
+      toast('🎯 Weekly goal updated');
+    });
+    $('savePersonaBtn').addEventListener('click', saveWarmProfile);
+    $('askAriaDrill').addEventListener('click', async () => {
+      const prompt = $('askAriaDrill').dataset.prompt || 'Give me one practical social-skill micro-drill for today.';
+      openChat();
+      await sendCoachMessage(prompt);
+    });
+    $('markDrillDone').addEventListener('click', () => {
+      toast('✅ Drill completed — great consistency!');
+    });
+    $('playerSetupForm').addEventListener('submit', savePlayerName);
+    $('playerNameSetup').addEventListener('input', (event) => { event.target.value = slugify(event.target.value); });
+    $('demoBtn').addEventListener('click', triggerDemoSession);
+    $('signOutButton').addEventListener('click', async () => { if (!auth) return; await signOut(auth); window.location.href = '/auth.html'; });
+    window.addEventListener('resize', resizeConfettiCanvas);
+    window.addEventListener('keydown', (event) => { if (event.key === 'Escape') { closeChat(); $('reportModal').classList.add('hidden'); } });
+
+    appendChatBubble('coach', 'Hi, I’m Coach Aria. Ask me about recent progress, strengths, or one gentle next step to practice.');
+    setDateChip();
+    resizeConfettiCanvas();
+    applyWarmProfileUI();
+
+    const config = await fetch('/api/firebase-config').then((response) => response.json()).catch(() => ({ configured: false }));
+    firebaseConfigured = !!config.configured;
+    if (!firebaseConfigured) enterDemoMode();
+    else {
+      const firebaseApp = initializeApp({ apiKey: config.apiKey, authDomain: config.authDomain, databaseURL: config.databaseURL, projectId: config.projectId, messagingSenderId: config.messagingSenderId, appId: config.appId });
+      auth = getAuth(firebaseApp); database = getDatabase(firebaseApp);
+      onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        if (!user) { window.location.href = '/auth.html'; return; }
+        renderUserChip(user, currentPlayerName, false);
+        try {
+          const userSnap = await get(ref(database, `users/${user.uid}`));
+          const userData = userSnap.val() || {};
+          const playerName = userData.playerName;
+          if (!playerName) {
+            $('playerModal').classList.remove('hidden');
+            $('playerNameSetup').value = slugify(user.displayName || user.email?.split('@')[0] || '');
+            return;
+          }
+          $('playerModal').classList.add('hidden');
+          connectRealtimePlayer(playerName);
+        } catch (err) {
+          console.error('RTDB read failed (check Firebase rules):', err.message);
+          // Show player name modal as fallback so user isn't stuck
+          $('playerModal').classList.remove('hidden');
+          $('playerNameSetup').value = slugify(user.displayName || user.email?.split('@')[0] || '');
+          $('playerModalError').textContent = 'Could not load your profile. Check Firebase rules allow read/write.';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

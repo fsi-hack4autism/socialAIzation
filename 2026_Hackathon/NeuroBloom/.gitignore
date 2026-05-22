@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.json.key
+fsihackathon-fadc2-firebase-adminsdk-*.json
+.vercel/
+*.rar
+*.zip
+*.7z
